@@ -1,0 +1,75 @@
+﻿@model SV22T1020697.Models.Sales.OrderSearchInput
+@{
+    ViewBag.Title = "Quản lý Đơn hàng";
+}
+
+@section PageToolBar {
+    <a href="~/Order/Create" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i>
+        Lập đơn hàng mới
+    </a>
+}
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form id="formSearch"
+              method="get"
+              action="~/Order/Search"
+              data-target="searchResult"
+              onsubmit="paginationSearch(event, this, 1)">
+
+            <input type="hidden" asp-for="PageSize" />
+
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <label class="form-label">Trạng thái</label>
+                    <select class="form-select" asp-for="Status">
+                        <option value="0">-- Tất cả trạng thái --</option>
+                        <option value="1">Đơn hàng vừa gửi/khởi tạo</option>
+                        <option value="2">Đơn hàng đã chấp nhận</option>
+                        <option value="3">Đơn hàng đang được vận chuyển</option>
+                        <option value="4">Đơn hàng đã hoàn tất</option>
+                        <option value="-1">Đơn hàng đã bị hủy</option>
+                        <option value="-2">Đơn hàng bị từ chối</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Khoảng thời gian</label>
+                    <div class="input-group">
+                        <input type="text" asp-for="DateFrom"
+                               class="form-control date-picker" placeholder="Từ ngày" />
+                        <span class="input-group-text">-</span>
+                        <input type="text" asp-for="DateTo"
+                               class="form-control date-picker" placeholder="Đến ngày" />
+                    </div>
+                </div>
+
+                <div class="col-md-5">
+                    <label class="form-label">Tìm kiếm khách hàng</label>
+                    <div class="input-group">
+                        <input type="text" asp-for="SearchValue"
+                               class="form-control"
+                               placeholder="Tên khách hàng hoặc địa chỉ giao hàng..." autofocus />
+
+                        <button class="btn btn-info d-flex align-items-center">
+                            <i class="bi bi-search me-1"></i> Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div id="searchResult"></div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Tự động load dữ liệu ngay khi vào trang dựa trên Model.Page hiện tại
+            paginationSearch(null, document.getElementById("formSearch"), @Model.Page);
+        });
+    </script>
+}

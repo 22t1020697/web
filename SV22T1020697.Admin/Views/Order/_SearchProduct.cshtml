@@ -1,0 +1,44 @@
+﻿
+@model PagedResult<Product>
+@{
+    Layout = null;
+}
+
+@foreach (var item in Model.DataItems)
+{
+    <form action="~/Order/AddToCart" method="post"
+          class="border rounded p-2 mb-2 mt-1"
+          onsubmit="addCartItem(event, this)">
+        <input type="hidden" name="ProductID" value="@item.ProductID" />
+        <strong>@item.ProductName</strong>
+        <div class="row mt-2">
+            <div class="col-4"><img src="~/images/products/@item.Photo" class="img-fluid border" /></div>
+            <div class="col-8">
+                <input name="price" class="form-control form-control-sm mb-1" value="@item.Price" />
+
+                <input type="number" name="Quantity" value="1" min="1" class="form-control form-control-sm" />
+                <button type="submit" class="btn btn-sm btn-primary mt-2 w-100">Thêm vào giỏ</button>
+            </div>
+        </div>
+    </form>
+}
+
+<div class="d-flex justify-content-center align-items-center gap-3 mt-3 pb-2">
+    @if (Model.Page > 1)
+    {
+        <button type="button" class="btn btn-sm btn-outline-primary px-3"
+                onclick="paginationSearch(event, document.getElementById('formSearch'), @(Model.Page - 1))">
+            &lt;
+        </button>
+    }
+
+    <span class="fw-bold text-muted">@Model.Page / @Model.PageCount</span>
+
+    @if (Model.Page < Model.PageCount)
+    {
+        <button type="button" class="btn btn-sm btn-outline-primary px-3"
+                onclick="paginationSearch(event, document.getElementById('formSearch'), @(Model.Page + 1))">
+            &gt;
+        </button>
+    }
+</div>

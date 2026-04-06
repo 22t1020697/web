@@ -1,0 +1,85 @@
+﻿@model SV22T1020697.Models.Common.PagedResult<SV22T1020697.Models.Sales.OrderViewInfo>
+@{
+    Layout = null;
+}
+
+<div class="mb-2 text-muted">
+    Danh sách này có <strong>@Model.RowCount</strong> đơn hàng
+</div>
+
+<div class="card">
+    <div class="card-body p-1">
+        <table class="table table-bordered table-hover mb-0 align-middle">
+            <thead class="table-secondary">
+                <tr>
+                    <th>Ngày đặt hàng</th>
+                    <th>Tên khách hàng</th>
+                    <th>Điện thoại</th>
+                    <th>Ngày duyệt</th>
+                    <th>Nhân viên xử lý</th>
+                    <th class="text-end">Tổng tiền</th>
+                    <th class="text-center" style="width:140px;">Trạng thái</th>
+                    <th class="text-center" style="width:40px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.DataItems != null && Model.DataItems.Count > 0)
+                {
+                    foreach (var item in Model.DataItems)
+                    {
+                        <tr>
+                            <td>@item.OrderTime.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@item.CustomerName</td>
+                            <td>@item.CustomerPhone</td>
+                            <td>@(item.AcceptTime.HasValue? item.AcceptTime.Value.ToString("dd/MM/yyyy") : "")</td>
+                            <td>@item.EmployeeName</td>
+                            <td class="text-end">
+                                @* @item.SumOfPrice.ToString("N0") *@
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-info text-dark">
+                                    @item.Status
+                                </span>
+                            </td>
+                            <td class="text-center text-nowrap">
+                                <a href="~/Order/Detail/@item.OrderID" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-receipt"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card-footer">
+        <ul class="pagination justify-content-center mb-0">
+            @foreach (var p in Model.GetDisplayPages())
+            {
+                if (p.IsCurrent)
+                {
+                    <li class="page-item active">
+                        <a class="page-link" href="#">@p.Page</a>
+                    </li>
+                }
+                else if (p.IsEllipsis)
+                {
+                    <li class="page-item">
+                        <a class="page-link">....</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="javascript:;"
+                           onclick="paginationSearch(event, document.getElementById('formSearch'), @p.Page)">
+                            @p.Page
+                        </a>
+                    </li>
+                }
+            }
+        </ul>
+    </div>
+</div>

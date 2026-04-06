@@ -1,0 +1,233 @@
+﻿@model SV22T1020697.Models.Sales.OrderViewInfo
+@using SV22T1020697.BusinessLayers
+@using SV22T1020697.Models.Sales
+@{
+    ViewBag.Title = "Chi tiết đơn hàng";
+
+    // Lấy danh sách mặt hàng
+    var details = SalesDataService.ListDetailsAsync(Model.OrderID).Result;
+
+    // Định nghĩa hiển thị trạng thái
+    string statusName = "";
+    string statusClass = "alert-secondary";
+    switch (Model.Status)
+    {
+        case OrderStatusEnum.New: statusName = "Đơn hàng mới"; statusClass = "alert-info"; break;
+        case OrderStatusEnum.Accepted: statusName = "Đã duyệt (Chờ giao hàng)"; statusClass = "alert-primary"; break;
+        case OrderStatusEnum.Shipping: statusName = "Đang giao hàng"; statusClass = "alert-warning"; break;
+        case OrderStatusEnum.Completed: statusName = "Đã hoàn tất"; statusClass = "alert-success"; break;
+        case OrderStatusEnum.Cancelled: statusName = "Đã hủy"; statusClass = "alert-danger"; break;
+        case OrderStatusEnum.Rejected: statusName = "Bị từ chối"; statusClass = "alert-danger"; break;
+    }
+}
+
+@section PageToolBar {
+    <div class="btn-group">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+            <i class="bi bi-gear me-1"></i> Xử lý đơn hàng
+        </button>
+        <ul class="dropdown-menu">
+            @if (Model.Status == OrderStatusEnum.New)
+            {
+                <li><a class="dropdown-item open-modal" href="~/Order/Accept/@Model.OrderID">Duyệt đơn hàng</a></li>
+                <li><a class="dropdown-item text-danger open-modal" href="~/Order/Reject/@Model.OrderID">Từ chối đơn hàng</a></li>
+                <li><a class="dropdown-item text-danger open-modal" href="~/Order/Cancel/@Model.OrderID">Hủy đơn hàng</a></li>
+            }
+            else if (Model.Status == OrderStatusEnum.Accepted)
+            {
+                <li><a class="dropdown-item open-modal" href="~/Order/Shipping/@Model.OrderID">Chuyển giao hàng</a></li>
+                <li><a class="dropdown-item text-danger open-modal" href="~/Order/Cancel/@Model.OrderID">Hủy đơn hàng</a></li>
+            }
+            else if (Model.Status == OrderStatusEnum.Shipping)
+            {
+                <li><a class="dropdown-item open-modal" href="~/Order/Finish/@Model.OrderID">Hoàn tất đơn hàng</a></li>
+                <li><a class="dropdown-item text-danger open-modal" href="~/Order/Cancel/@Model.OrderID">Hủy đơn hàng</a></li>
+            }
+        </ul>
+    </div>
+
+    @if (Model.Status == OrderStatusEnum.New || Model.Status == OrderStatusEnum.Cancelled || Model.Status == OrderStatusEnum.Rejected)
+    {
+        <a href="~/Order/Delete/@Model.OrderID" class="btn btn-danger ms-1 open-modal">
+            <i class="bi bi-trash"></i> Xóa đơn hàng
+        </a>
+    }
+
+    <a href="~/Order" class="btn btn-secondary ms-1">Quay lại</a>
+}
+
+<div class="alert @statusClass mb-3">
+    <i class="bi bi-info-circle-fill me-2"></i>
+    <strong>Trạng thái đơn hàng:</strong> @statusName
+    @if (Model.FinishedTime.HasValue)
+    {
+        <span> lúc <b>@Model.FinishedTime.Value.ToString("dd/MM/yyyy HH:mm")</b></span>
+    }
+</div>
+
+<div class="card card-primary card-outline mb-3">
+    <div class="card-header bg-white">
+        <h5 class="card-title mb-0"><i class="bi bi-receipt text-muted me-2"></i> Thông tin đơn hàng</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-2 fw-bold">Mã đơn hàng</div>
+            <div class="col-md-4">@Model.OrderID</div>
+            <div class="col-md-2 fw-bold">Ngày lập</div>
+            <div class="col-md-4">@Model.OrderTime.ToString("dd/MM/yyyy HH:mm")</div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 fw-bold">Nhân viên phụ trách</div>
+            <div class="col-md-4">@Model.EmployeeName</div>
+            <div class="col-md-2 fw-bold">Ngày nhận đơn</div>
+            <div class="col-md-4">@(Model.AcceptTime?.ToString("dd/MM/yyyy HH:mm") ?? "")</div>
+        </div>
+    </div>
+</div>
+
+<div class="card card-info card-outline mb-3">
+    <div class="card-header bg-white">
+        <h5 class="card-title mb-0"><i class="bi bi-person text-muted me-2"></i> Thông tin khách hàng</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-2 fw-bold">Khách hàng</div>
+            <div class="col-md-4">@Model.CustomerName</div>
+            <div class="col-md-2 fw-bold">Điện thoại</div>
+            <div class="col-md-4">@Model.CustomerPhone</div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 fw-bold">Email</div>
+            <div class="col-md-10">@Model.CustomerEmail</div>
+        </div>
+    </div>
+</div>
+
+<div class="card card-success card-outline mb-3">
+    <div class="card-header bg-white">
+        <h5 class="card-title mb-0"><i class="bi bi-truck text-muted me-2"></i> Thông tin giao hàng</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-2 fw-bold">Người giao hàng</div>
+            <div class="col-md-4">@(string.IsNullOrEmpty(Model.ShipperName) ? "(Chưa có)" : Model.ShipperName)</div>
+            <div class="col-md-2 fw-bold"></div>
+            <div class="col-md-4"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 fw-bold">Địa chỉ giao hàng</div>
+            <div class="col-md-10">@Model.DeliveryAddress</div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 fw-bold">Tỉnh / Thành</div>
+            <div class="col-md-10">@Model.DeliveryProvince</div>
+        </div>
+    </div>
+</div>
+
+<div class="card card-secondary card-outline">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">Danh sách mặt hàng</h5>
+    </div>
+    <div class="card-body table-responsive p-0">
+        <table class="table table-bordered table-hover mb-0">
+            <thead class="table-light">
+                <tr class="text-center">
+                    <th style="width:50px">STT</th>
+                    <th>Tên hàng</th>
+                    <th style="width:100px">ĐVT</th>
+                    <th style="width:100px">SL</th>
+                    <th style="width:150px">Giá</th>
+                    <th style="width:150px">Thành tiền</th>
+                    @if (Model.Status == OrderStatusEnum.New)
+                    {
+                        <th style="width:100px">Thao tác</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int stt = 1; decimal total = 0;
+                }
+                @foreach (var item in details)
+                {
+                    <tr>
+                        <td class="text-center">@(stt++)</td>
+                        <td>@item.ProductName</td>
+                        <td class="text-center">@item.Unit</td>
+                        <td class="text-center">@item.Quantity</td>
+                        <td class="text-end">@item.SalePrice.ToString("N0")</td>
+                        <td class="text-end fw-bold">@((item.Quantity * item.SalePrice).ToString("N0"))</td>
+
+                        @if (Model.Status == OrderStatusEnum.New)
+                        {
+                            <td class="text-center">
+                                <a href="~/Order/EditDetail/@Model.OrderID?productId=@item.ProductID"
+                                   class="btn btn-xs btn-primary open-modal" title="Sửa">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="~/Order/DeleteDetail/@Model.OrderID?productId=@item.ProductID"
+                                   class="btn btn-xs btn-danger ms-1"
+                                   onclick="return confirm('Xóa mặt hàng này khỏi đơn hàng?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        }
+                    </tr>
+                    total += (item.Quantity * item.SalePrice);
+                }
+            </tbody>
+            <tfoot>
+                <tr class="bg-light">
+                    <th colspan="5" class="text-end">Tổng cộng:</th>
+                    <th class="text-end text-danger fs-5">@total.ToString("N0") VNĐ</th>
+                    @if (Model.Status == OrderStatusEnum.New)
+                    {
+                        <th></th>
+                    }
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+               $(document).ready(function () {
+            // Bắt sự kiện 'submit' của bất kỳ form nào có class 'form-ajax'
+            $(document).on('submit', '.form-ajax', function (e) {
+                // 1. Lệnh "Dừng lại": Chặn ngay việc trình duyệt tự chuyển trang
+                e.preventDefault();
+
+                var form = $(this); // Lấy chính cái form đang thao tác
+
+                // 2. Gửi yêu cầu âm thầm
+                $.ajax({
+                    url: form.attr('action'),  // Tự động lấy URL từ thẻ form (VD: /Order/Accept/2015)
+                    type: form.attr('method'), // Tự động lấy method (POST)
+                    data: form.serialize(),    // Tự động lấy toàn bộ dữ liệu trong form
+                    success: function (response) {
+                        // Kiểm tra mã thành công từ Controller trả về
+                        if (response.code === 1 || response.Code === 1) {
+                            // 3. Tải lại trang hiện tại (trang Detail)
+                            location.reload();
+                        } else {
+                            alert("Lỗi: " + (response.message || response.Message));
+                        }
+                    },
+                    error: function () {
+                        alert("Đã xảy ra lỗi kết nối với máy chủ.");
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .card-body .row {
+            border-bottom: 1px dotted #646464;
+        }
+    </style>
+}

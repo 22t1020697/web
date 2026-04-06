@@ -1,0 +1,101 @@
+﻿@{
+    ViewBag.Title = "Phê duyệt đơn hàng";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-primary bg-gradient py-3 text-white text-center border-0">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-shield-check me-2"></i>XÁC NHẬN PHÊ DUYỆT ĐƠN HÀNG
+                    </h5>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <div class="alert alert-primary bg-opacity-10 border-0 d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <small class="text-muted d-block">Đơn hàng</small>
+                            <span class="fw-bold text-primary">#12345</span>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted d-block">Tổng thanh toán</small>
+                            <span class="fw-bold text-danger fs-5">42,500,000đ</span>
+                        </div>
+                    </div>
+
+                    <form action="/Order/ConfirmChangeStatus/1" method="post">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold text-secondary small text-uppercase">Chuyển sang trạng thái</label>
+                                <select name="Status" class="form-select form-select-lg fw-bold text-success border-2">
+                                    <option value="2" selected>Đã phê duyệt (Chờ giao hàng)</option>
+                                    <option value="3">Đang giao hàng</option>
+                                    <option value="4">Hoàn tất</option>
+                                    <option value="5">Từ chối / Hủy đơn</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-bold text-secondary small text-uppercase">Phân công giao hàng</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="bi bi-truck text-primary"></i></span>
+                                    <select name="ShipperId" class="form-select">
+                                        <option value="">-- Chọn nhân viên giao hàng --</option>
+                                        <option value="1">Nguyễn Văn Shipper A</option>
+                                        <option value="2">Trần Thị Shipper B</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-bold text-secondary small text-uppercase">Ghi chú phê duyệt</label>
+                                <textarea name="Note" class="form-control" rows="3" placeholder="Nhập lưu ý cho kho hoặc shipper nếu có..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-4">
+                            <div class="col-6">
+                                <a href="/Order/Detail/1" class="btn btn-light border w-100 py-2 fw-bold">
+                                    <i class="bi bi-x-circle me-1"></i> Hủy bỏ
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow">
+                                    Xác nhận duyệt <i class="bi bi-arrow-right ms-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-footer bg-light py-3 text-center border-0">
+                    <small class="text-muted italic">
+                        <i class="bi bi-info-circle me-1"></i> Thao tác này sẽ cập nhật trạng thái đơn hàng và gửi thông báo cho khách hàng.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f4f7f6;
+    }
+
+    .bg-gradient {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%) !important;
+    }
+
+    .form-select-lg {
+        font-size: 1rem;
+    }
+
+    .card {
+        border-radius: 1rem;
+    }
+</style>

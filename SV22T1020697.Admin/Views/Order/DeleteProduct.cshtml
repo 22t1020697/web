@@ -1,0 +1,276 @@
+﻿@{
+    ViewBag.Title = "Xác nhận chỉnh sửa";
+
+    // Giả định dữ liệu từ Model/Controller
+    int currentQuantityValue = 5;
+    long unitPrice = 42500000;
+    var orderId = 123; // Thay bằng @Model.OrderId thực tế của bạn
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+    :root {
+        --primary-soft: #f0f7ff;
+        --danger-soft: #fff5f5;
+    }
+
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .main-card {
+        border-radius: 20px;
+        border: none;
+    }
+
+    .card-header {
+        border-radius: 20px 20px 0 0 !important;
+    }
+
+    .product-info-box {
+        background: white;
+        border-radius: 15px;
+    }
+
+    /* Option Item Custom */
+    .option-item {
+        position: relative;
+        border: 2px solid #edf2f7;
+        border-radius: 12px;
+        padding: 1.2rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .form-check-input {
+        display: none;
+    }
+
+        .form-check-input:checked + .option-item {
+            border-color: #0d6efd;
+            background-color: var(--primary-soft);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.1);
+        }
+
+    #typeFull:checked + .option-item {
+        border-color: #dc3545;
+        background-color: var(--danger-soft);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.1);
+    }
+
+    /* Quantity Controls */
+    .qty-control {
+        background: #f1f3f5;
+        border-radius: 12px;
+        padding: 8px;
+    }
+
+    .btn-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px !important;
+        background: white;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+    }
+
+        .btn-circle:hover {
+            background: #0d6efd;
+            color: white !important;
+        }
+
+    .btn-action {
+        border-radius: 12px;
+        padding: 15px;
+        font-weight: 700;
+        text-align: center;
+        text-transform: uppercase;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .price-summary {
+        background: #fff;
+        border-left: 5px solid #0d6efd;
+        border-radius: 12px;
+        transition: border-color 0.3s;
+    }
+</style>
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-9 col-lg-7">
+            <div class="card main-card shadow-lg">
+                <div class="card-header bg-dark py-4 text-white text-center">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-cart-dash me-2"></i> ĐIỀU CHỈNH GIỎ HÀNG
+                    </h5>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <div class="product-info-box d-flex align-items-center p-3 mb-4 border border-dashed">
+                        <img src="https://images.pexels.com/photos/16347/pexels-photo.jpg"
+                             class="rounded-3 shadow-sm me-3"
+                             style="width:80px; height:80px; object-fit:cover" />
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1 text-dark">Macbook Pro 14" M2 2023</h6>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="small text-muted">Đang có: <strong class="text-dark">@currentQuantityValue</strong></span>
+                                <span class="small text-primary fw-bold">@unitPrice.ToString("N0")đ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form action="@Url.Action("UpdateCart", "Order")" method="post">
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-secondary small text-uppercase mb-3">1. Hình thức</label>
+                                <div class="row g-2">
+                                    <div class="col-12 mb-2">
+                                        <input class="form-check-input" type="radio" name="deleteType" id="typePartial" value="partial" checked onchange="toggleInputs()">
+                                        <label class="option-item" for="typePartial">
+                                            <i class="bi bi-dash-square fs-5 me-2 text-primary"></i>
+                                            <span class="fw-bold">Giảm bớt</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-12">
+                                        <input class="form-check-input" type="radio" name="deleteType" id="typeFull" value="full" onchange="toggleInputs()">
+                                        <label class="option-item" for="typeFull">
+                                            <i class="bi bi-trash3 fs-5 me-2 text-danger"></i>
+                                            <span class="fw-bold text-danger">Xóa tất cả</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 border-start" id="qtyInputSection">
+                                <label class="form-label fw-bold text-secondary small text-uppercase mb-3">2. Số lượng bỏ</label>
+                                <div class="qty-control d-flex align-items-center justify-content-between shadow-sm border">
+                                    <button class="btn btn-circle text-dark" type="button" onclick="changeDelQty(-1)">
+                                        <i class="bi bi-dash-lg"></i>
+                                    </button>
+                                    <input type="number" id="removeQty" name="removeQty"
+                                           class="form-control text-center fw-bold border-0 bg-transparent fs-4"
+                                           value="1" min="1" max="@currentQuantityValue" oninput="validateQty()">
+                                    <button class="btn btn-circle text-dark" type="button" onclick="changeDelQty(1)">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
+                                </div>
+                                <div id="hintText" class="mt-4 small text-center p-3 rounded-4 fw-bold"></div>
+                            </div>
+                        </div>
+
+                        <div id="summaryBox" class="price-summary p-3 mb-5 shadow-sm border border-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="text-muted small text-uppercase fw-bold d-block">Giá trị còn lại</span>
+                                    <span id="remainQtyLabel" class="badge bg-primary-subtle text-primary">05 sản phẩm</span>
+                                </div>
+                                <h3 class="mb-0 fw-bold text-primary" id="totalPriceDisplay">0đ</h3>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <a href="@Url.Action("Detail", "Order", new { id = orderId })"
+                                   class="btn btn-light border btn-action w-100 text-decoration-none text-secondary">
+                                    <i class="bi bi-x-circle me-2"></i> HỦY BỎ
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <button type="submit" class="btn btn-danger btn-action w-100 shadow-sm">
+                                    <i class="bi bi-check2-circle me-2"></i> XÁC NHẬN
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const currentQty = @currentQuantityValue;
+    const unitPrice = @unitPrice;
+    const removeQtyInput = document.getElementById('removeQty');
+    const qtySection = document.getElementById('qtyInputSection');
+    const hintText = document.getElementById('hintText');
+    const totalPriceDisplay = document.getElementById('totalPriceDisplay');
+    const remainQtyLabel = document.getElementById('remainQtyLabel');
+    const summaryBox = document.getElementById('summaryBox');
+
+    function toggleInputs() {
+        const isFullDelete = document.getElementById('typeFull').checked;
+        if (isFullDelete) {
+            qtySection.style.opacity = "0.3";
+            qtySection.style.pointerEvents = "none";
+            removeQtyInput.value = currentQty;
+        } else {
+            qtySection.style.opacity = "1";
+            qtySection.style.pointerEvents = "auto";
+            removeQtyInput.value = 1;
+        }
+        updateUI();
+    }
+
+    function changeDelQty(val) {
+        let newVal = parseInt(removeQtyInput.value) + val;
+        if (newVal >= 1 && newVal <= currentQty) {
+            removeQtyInput.value = newVal;
+            updateUI();
+        }
+    }
+
+    function validateQty() {
+        let val = parseInt(removeQtyInput.value);
+        if (val > currentQty) removeQtyInput.value = currentQty;
+        if (val < 1 || isNaN(val)) removeQtyInput.value = 1;
+        updateUI();
+    }
+
+    function updateUI() {
+        const isFull = document.getElementById('typeFull').checked;
+        let removeVal = parseInt(removeQtyInput.value) || 0;
+        let remain = currentQty - removeVal;
+
+        // Cập nhật Hint
+        if (isFull || removeVal >= currentQty) {
+            remain = 0;
+            hintText.className = "mt-4 small text-center p-3 rounded-4 fw-bold bg-danger-subtle text-danger border border-danger-subtle";
+            hintText.innerHTML = `<i class="bi bi-exclamation-circle-fill me-1"></i> Xóa hoàn toàn khỏi giỏ.`;
+
+            summaryBox.style.borderColor = "#dc3545";
+            totalPriceDisplay.className = "mb-0 fw-bold text-danger";
+            remainQtyLabel.className = "badge bg-danger-subtle text-danger";
+        } else {
+            hintText.className = "mt-4 small text-center p-3 rounded-4 fw-bold bg-primary-subtle text-primary border border-primary-subtle";
+            hintText.innerHTML = `<i class="bi bi-calculator-fill me-1"></i> Còn lại: <strong>${remain}</strong> cái.`;
+
+            summaryBox.style.borderColor = "#0d6efd";
+            totalPriceDisplay.className = "mb-0 fw-bold text-primary";
+            remainQtyLabel.className = "badge bg-primary-subtle text-primary";
+        }
+
+        // Cập nhật Tiền & Nhãn số lượng
+        const totalRemaining = remain * unitPrice;
+        totalPriceDisplay.innerText = totalRemaining.toLocaleString('vi-VN') + 'đ';
+        remainQtyLabel.innerText = (remain < 10 ? '0' + remain : remain) + ' sản phẩm';
+    }
+
+    // Chạy khởi tạo khi trang load
+    window.onload = updateUI;
+</script>

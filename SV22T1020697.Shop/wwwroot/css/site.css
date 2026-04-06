@@ -1,0 +1,187 @@
+:root {
+    /* B?ng màu Xanh Ocean & Sky */
+    --primary-glow: #00d2ff; /* Xanh Cyan sáng */
+    --secondary-glow: #3a7bd5; /* Xanh bi?n Royal */
+    --dark-bg: #FFFFFF; /*  n?n */
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --text-main: #e0e6ed;
+    --accent-blue: #00f2ff;
+}
+
+body.dark-theme {
+    background-color: var(--dark-bg);
+    /*background-image: radial-gradient(circle at 50% -20%, #0a1931, var(--dark-bg));*/
+    background-image: none !important;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: var(--text-main);
+    margin: 0;
+}
+
+/* --- Top Bar --- */
+.top-bar-art {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 8px 0;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(0, 210, 255, 0.1);
+}
+    .top-bar-art .contact-info span {
+        color: #ffffff;
+        opacity: 0.9;
+    }
+
+.btn-auth {
+    padding: 6px 22px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13px;
+    transition: 0.3s;
+}
+
+
+    .btn-auth.outline {
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-auth.solid {
+        background: linear-gradient(45deg, var(--primary-glow), var(--secondary-glow));
+        color: #fff;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 210, 255, 0.2);
+    }
+
+    .btn-auth:hover {
+        transform: translateY(-2px);
+        color: #fff;
+        filter: brightness(1.1);
+    }
+
+/* --- Navbar Custom --- */
+.custom-navbar {
+    background: #336699 !important;
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(0, 210, 255, 0.1);
+    padding: 12px 0;
+}
+
+.logo-text {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #fff !important;
+    text-decoration: none;
+}
+
+    .logo-text span {
+        color: var(--primary-glow);
+        text-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
+    }
+
+/* --- Search Bar (Gi?ng Hình 1 nh?ng màu Xanh) --- */
+.search-container-header {
+    margin-right: 25px;
+}
+
+.search-box-custom {
+    display: flex;
+    background: #ffffff;
+    border-radius: 50px;
+    border: 1px solid var(--primary-glow);
+    overflow: hidden;
+    width: 380px;
+    height: 40px;
+    align-items: center;
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
+}
+
+    .search-box-custom input {
+        border: none;
+        padding: 0 20px;
+        outline: none;
+        width: 100%;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .search-box-custom button {
+        background: linear-gradient(to bottom, var(--primary-glow), var(--secondary-glow));
+        color: white;
+        border: none;
+        height: 100%;
+        padding: 0 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .search-box-custom button:hover {
+            filter: contrast(1.2);
+        }
+
+/* --- Menu Links --- */
+.art-btn {
+    color: #ffffff !important;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 8px 20px !important;
+    border-radius: 50px;
+    transition: 0.3s;
+}
+
+    .art-btn:hover, .art-btn.active {
+        color: var(--primary-glow) !important;
+        background: rgba(0, 210, 255, 0.05);
+    }
+
+/* --- Cart Button --- */
+.cart-glass-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(0, 210, 255, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    padding: 6px 15px;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+    .cart-glass-btn:hover {
+        border-color: var(--primary-glow);
+        background: rgba(0, 210, 255, 0.08);
+    }
+
+.icon-box {
+    position: relative;
+    font-size: 1.2rem;
+    margin-right: 12px;
+    color: var(--primary-glow);
+}
+
+.badge-count {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background: #ff2d55;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 50px;
+    color: #fff;
+}
+
+.price-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.cart-label {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.value {
+    font-weight: 800;
+    color: var(--accent-blue);
+    font-size: 14px;
+}

@@ -1,0 +1,275 @@
+﻿@using SV22T1020697.Models.Sales
+@* Lưu ý: Thêm namespace chứa Enum và hàm GetDescription dưới đây *@
+@using SV22T1020697.BusinessLayers
+@model IEnumerable<SV22T1020697.Models.Sales.OrderItemModel>
+
+@{
+    ViewData["Title"] = "Lịch sử đơn hàng";
+    var orders = Model ?? Enumerable.Empty<OrderItemModel>();
+}
+
+<style>
+    body {
+        background-color: #ffffff !important;
+        color: #334155;
+        font-family: 'Inter', -apple-system, sans-serif;
+    }
+
+    .page-header {
+        margin-bottom: 2.5rem;
+    }
+
+    .history-card {
+        border: 1px solid #f1f5f9;
+        border-radius: 20px;
+        background: #fff;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    /* Table Styling */
+    .table-modern thead th {
+        background: #f8fafc;
+        border-bottom: 1px solid #f1f5f9;
+        color: #64748b;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 20px;
+    }
+
+    .table-modern tbody td {
+        padding: 20px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f8fafc;
+    }
+
+    /* Status Pill */
+    .status-pill {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: inline-block;
+        border: 1px solid transparent;
+    }
+
+    .status-new {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border-color: #dbeafe;
+    }
+
+    .status-accepted {
+        background: #f0fdf4;
+        color: #15803d;
+        border-color: #dcfce7;
+    }
+
+    .status-shipping {
+        background: #fefce8;
+        color: #a16207;
+        border-color: #fef9c3;
+    }
+
+    .status-completed {
+        background: #f8fafc;
+        color: #1e293b;
+        border-color: #e2e8f0;
+    }
+
+    .status-cancel {
+        background: #fef2f2;
+        color: #b91c1c;
+        border-color: #fee2e2;
+    }
+
+    /* Action Buttons */
+    .btn-action {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-view {
+        background: #f1f5f9;
+        color: #1e293b;
+    }
+
+        .btn-view:hover {
+            background: #1e293b;
+            color: #fff;
+        }
+
+    .btn-edit-small {
+        color: #f59e0b;
+        background: transparent;
+        border: none;
+    }
+
+    .btn-cancel-small {
+        color: #ef4444;
+        background: transparent;
+        border: none;
+    }
+
+    .order-id {
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="container my-5">
+    <div class="page-header d-flex justify-content-between align-items-end">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Lịch sử đơn hàng</h2>
+            <p class="text-muted small mb-0">Theo dõi và quản lý các đơn hàng bạn đã đặt</p>
+        </div>
+        <div class="text-muted small fw-medium">
+            TỔNG CỘNG: <span class="text-dark fw-bold">@orders.Count()</span> ĐƠN
+        </div>
+    </div>
+
+    <div class="history-card">
+        <div class="table-responsive">
+            <table class="table table-modern align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 120px;">Mã đơn</th>
+                        <th>Ngày đặt</th>
+                        <th>Địa chỉ giao hàng</th>
+                        <th class="text-end">Tổng tiền</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-end">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in orders)
+                    {
+                        string statusClass = item.Status switch
+                        {
+                            1 => "status-new",
+                            2 => "status-accepted",
+                            3 => "status-shipping",
+                            4 => "status-completed",
+                            -1 or -2 => "status-cancel",
+                            _ => ""
+                        };
+
+                        <tr id="order-@item.OrderID">
+                            <td><span class="order-id">#@item.OrderID</span></td>
+                            <td>
+                                <div class="text-dark fw-medium small">@item.OrderTime.ToString("dd/MM/yyyy")</div>
+                                <div class="text-muted extra-small" style="font-size: 11px;">@item.OrderTime.ToString("HH:mm")</div>
+                            </td>
+                            <td>
+                                <div class="text-dark small fw-medium">@item.DeliveryProvince</div>
+                                <div class="text-muted small text-truncate" style="max-width: 200px;">@item.DeliveryAddress</div>
+                            </td>
+                            <td class="text-end">
+                                <span class="fw-bold text-dark">@item.TotalAmount.ToString("N0") <small>đ</small></span>
+                            </td>
+                            <td class="text-center">
+                                <span class="status-pill @statusClass">
+                                    @* Sửa lỗi: Gọi tường minh giá trị Enum *@
+                                    @{
+                                        var statusDesc = ((OrderStatusEnum)item.Status).GetDescription();
+                                        @statusDesc
+                                    }
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end align-items-center gap-3">
+                                    @if (item.Status == 1) // Trạng thái "Vừa tạo"
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.OrderID" class="btn-edit-small small fw-bold text-decoration-none" title="Sửa địa chỉ">
+                                            SỬA
+                                        </a>
+                                        <button class="btn-cancel-small btn-cancel small fw-bold" data-id="@item.OrderID">
+                                            HỦY
+                                        </button>
+                                    }
+                                    <a asp-action="Detail" asp-route-id="@item.OrderID" class="btn-action btn-view" title="Xem chi tiết">
+                                        <i class="bi bi-arrow-right-short fs-4"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!orders.Any())
+        {
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="bi bi-bag-x text-light-emphasis" style="font-size: 4rem;"></i>
+                </div>
+                <h5 class="fw-bold text-dark">Chưa có đơn hàng nào</h5>
+                <p class="text-muted small">Có vẻ như bạn chưa thực hiện giao dịch nào.</p>
+                <a href="/" class="btn btn-dark rounded-pill px-4 mt-2 fw-bold btn-sm">MUA SẮM NGAY</a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Lấy CSRF token từ form (nếu có)
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+            document.querySelectorAll(".btn-cancel").forEach(btn => {
+                btn.addEventListener("click", function () {
+                    const id = this.dataset.id;
+
+                    if (!confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) return;
+
+                    const originalText = this.innerText;
+                    this.disabled = true;
+                    this.innerText = "...";
+
+                    fetch('/Order/Cancel', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-form-urlencoded',
+                            'RequestVerificationToken': token
+                        },
+                        body: 'id=' + id
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            const row = document.getElementById("order-" + id);
+                            // Cập nhật giao diện trạng thái ngay lập tức
+                            const statusCell = row.querySelector(".text-center");
+                            statusCell.innerHTML = '<span class="status-pill status-cancel">Đã hủy</span>';
+
+                            // Xóa các nút thao tác không cần thiết
+                            const actionDiv = row.querySelector(".d-flex.justify-content-end");
+                            actionDiv.querySelectorAll(".btn-edit-small, .btn-cancel-small").forEach(el => el.remove());
+                        } else {
+                            alert(data.message || "Không thể hủy đơn hàng.");
+                            this.disabled = false;
+                            this.innerText = originalText;
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert("Lỗi kết nối hệ thống.");
+                        this.disabled = false;
+                        this.innerText = originalText;
+                    });
+                });
+            });
+        });
+    </script>
+}

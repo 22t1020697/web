@@ -1,0 +1,77 @@
+﻿@{
+    ViewBag.Title = "Chi tiết sản phẩm";
+
+    // ===== DỮ LIỆU MẪU (DEMO) =====
+    var product = new
+    {
+        ProductID = 1,
+        ProductName = "Máy in HP 1020",
+        CategoryName = "Thiết bị văn phòng",
+        Unit = "Cái",
+        Price = 3500000,
+        Description = "Máy in laser đen trắng, phù hợp cho văn phòng nhỏ"
+    };
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+
+        <div class="card card-info card-outline">
+
+            <!-- HEADER -->
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="bi bi-info-circle me-2"></i>
+                    @ViewBag.Title
+                </h3>
+            </div>
+
+            <!-- BODY -->
+            <div class="card-body">
+
+                <table class="table table-bordered">
+                    <tr>
+                        <th style="width: 30%">Tên sản phẩm</th>
+                        <td>@product.ProductName</td>
+                    </tr>
+                    <tr>
+                        <th>Loại hàng</th>
+                        <td>@product.CategoryName</td>
+                    </tr>
+                    <tr>
+                        <th>Đơn vị tính</th>
+                        <td>@product.Unit</td>
+                    </tr>
+                    <tr>
+                        <th>Giá bán</th>
+                        <td class="text-danger fw-bold">
+                            @string.Format("{0:N0} đ", product.Price)
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Mô tả</th>
+                        <td>@product.Description</td>
+                    </tr>
+                </table>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="card-footer text-end">
+                <a href="@Url.Action("Index", "Product")"
+                   class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i>
+                    Quay lại
+                </a>
+
+                <a href="@Url.Action("Edit", "Product", new { id = product.ProductID })"
+                   class="btn btn-warning ms-2">
+                    <i class="bi bi-pencil-square"></i>
+                    Cập nhật
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+</div>

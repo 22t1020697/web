@@ -1,0 +1,337 @@
+﻿@using SV22T1020697.Models.Sales
+@model IEnumerable<SV22T1020697.Models.Sales.CartItem>
+@{
+    var order = ViewBag.Order as OrderItemModel;
+    ViewData["Title"] = "Chi tiết đơn hàng #" + order?.OrderID;
+    int currentStatus = order?.Status ?? 0;
+}
+
+<style>
+    body {
+        background-color: #ffffff !important;
+        color: #334155;
+        font-family: 'Inter', -apple-system, sans-serif;
+    }
+
+    /* Stepper */
+    .stepper-wrapper {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 3.5rem;
+        position: relative;
+    }
+
+        .stepper-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: #f1f5f9;
+            z-index: 1;
+        }
+
+    .step-item {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+    }
+
+    .step-counter {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #fff;
+        border: 2px solid #e2e8f0;
+        color: #94a3b8;
+        font-weight: 600;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .step-item.active .step-counter {
+        background: #1e293b;
+        border-color: #1e293b;
+        color: #fff;
+        box-shadow: 0 0 0 5px rgba(30, 41, 59, 0.1);
+    }
+
+    .step-item.completed .step-counter {
+        background: #f8fafc;
+        border-color: #e2e8f0;
+        color: #1e293b;
+    }
+
+    .step-name {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #94a3b8;
+    }
+
+    .step-item.active .step-name {
+        color: #1e293b;
+    }
+
+    /* Layout Components */
+    .detail-card {
+        border: 1px solid #f1f5f9;
+        border-radius: 20px;
+        background: #fff;
+        overflow: hidden;
+    }
+
+    .card-header-custom {
+        padding: 24px;
+        border-bottom: 1px solid #f1f5f9;
+        background-color: #ffffff;
+    }
+
+    .info-label {
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #94a3b8;
+        letter-spacing: 1px;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    /* Table */
+    .table-modern thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 18px;
+        border: none;
+    }
+
+    .table-modern tbody td {
+        padding: 20px 18px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f8fafc;
+    }
+
+    .product-img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 12px;
+        background: #f1f5f9;
+    }
+
+    /* Status & Badges */
+    .status-pill {
+        padding: 8px 16px;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .status-1 {
+        background: #eff6ff;
+        color: #1d4ed8;
+    }
+    /* Vừa tạo */
+    .status-2 {
+        background: #fefce8;
+        color: #a16207;
+    }
+    /* Đã duyệt */
+    .status-3 {
+        background: #f0fdf4;
+        color: #15803d;
+    }
+    /* Đang giao */
+    .status-4 {
+        background: #f8fafc;
+        color: #1e293b;
+        border: 1px solid #e2e8f0;
+    }
+    /* Hoàn tất */
+    .status-cancel {
+        background: #fef2f2;
+        color: #b91c1c;
+    }
+    /* Đã hủy */
+
+    .summary-section {
+        background: #f8fafc;
+        padding: 30px;
+    }
+</style>
+
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-end mb-5">
+        <div>
+            <a asp-action="History" class="text-decoration-none text-muted small fw-bold">
+                <i class="bi bi-chevron-left me-1"></i> LỊCH SỬ ĐƠN HÀNG
+            </a>
+            <h2 class="fw-bold text-dark mt-3 mb-0">Đơn hàng #@order?.OrderID</h2>
+            <p class="text-muted small mt-1 mb-0">Ngày đặt: @order?.OrderTime.ToString("dd/MM/yyyy HH:mm")</p>
+        </div>
+        <div class="text-end">
+            <span class="status-pill @(currentStatus < 0 ? "status-cancel" : $"status-{currentStatus}")">
+                @order?.StatusDescription
+            </span>
+        </div>
+    </div>
+
+    @if (currentStatus >= 0)
+    {
+        <div class="stepper-wrapper px-md-5">
+            <div class="step-item @(currentStatus >= 1 ? (currentStatus == 1 ? "active" : "completed") : "")">
+                <div class="step-counter">@(currentStatus > 1 ? "✓" : "1")</div>
+                <div class="step-name">Khởi tạo</div>
+            </div>
+            <div class="step-item @(currentStatus >= 2 ? (currentStatus == 2 ? "active" : "completed") : "")">
+                <div class="step-counter">@(currentStatus > 2 ? "✓" : "2")</div>
+                <div class="step-name">Duyệt đơn</div>
+            </div>
+            <div class="step-item @(currentStatus >= 3 ? (currentStatus == 3 ? "active" : "completed") : "")">
+                <div class="step-counter">@(currentStatus > 3 ? "✓" : "3")</div>
+                <div class="step-name">Đang giao</div>
+            </div>
+            <div class="step-item @(currentStatus >= 4 ? "active" : "")">
+                <div class="step-counter">4</div>
+                <div class="step-name">Hoàn tất</div>
+            </div>
+        </div>
+    }
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="detail-card h-100 border-top border-4 border-dark">
+                <div class="card-header-custom">
+                    <h6 class="fw-bold mb-0">Thông tin nhận hàng</h6>
+                </div>
+                <div class="p-4">
+                    <div class="mb-4">
+                        <span class="info-label">Người nhận</span>
+                        <p class="fw-bold text-dark mb-0">@order?.CustomerName</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <span class="info-label">Địa chỉ giao hàng</span>
+                        <p class="text-dark mb-1">@order?.DeliveryAddress</p>
+                        <p class="text-muted small">@order?.DeliveryProvince</p>
+
+                        @if (currentStatus == 1)
+                        {
+                            <a asp-action="Edit" asp-route-id="@order?.OrderID" class="btn btn-sm btn-outline-dark rounded-pill px-3 mt-2 fw-bold" style="font-size: 11px;">
+                                <i class="bi bi-pencil-square me-1"></i> CHỈNH SỬA ĐỊA CHỈ
+                            </a>
+                        }
+                    </div>
+
+                    <div class="mb-4">
+                        <span class="info-label">Thanh toán</span>
+                        <p class="text-dark small"><i class="bi bi-wallet2 me-2"></i>Thanh toán khi nhận hàng (COD)</p>
+                    </div>
+
+                    @if (currentStatus == 1)
+                    {
+                        <hr class="my-4" style="opacity: 0.05;">
+                        <button type="button" onclick="cancelOrder(@order?.OrderID)" class="btn btn-link text-danger text-decoration-none fw-bold p-0 small">
+                            <i class="bi bi-x-circle me-1"></i> Yêu cầu hủy đơn hàng này
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="detail-card">
+                <div class="card-header-custom d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Danh sách sản phẩm</h6>
+                    <span class="badge bg-dark rounded-pill">@Model.Count() món</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th class="text-center">SL</th>
+                                <th class="text-end">Đơn giá</th>
+                                <th class="text-end">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img src="~/images/products/@(string.IsNullOrEmpty(item.Photo) ? "nophoto.png" : item.Photo)" class="product-img">
+                                            <div>
+                                                <p class="fw-bold text-dark mb-0 small">@item.ProductName</p>
+                                                <span class="text-muted extra-small">ĐVT: @item.Unit</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center fw-bold">@item.Quantity</td>
+                                    <td class="text-end text-muted small">@item.SalePrice.ToString("N0") đ</td>
+                                    <td class="text-end fw-bold text-dark">@item.TotalPrice.ToString("N0") đ</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="summary-section">
+                    <div class="row justify-content-end">
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">Tạm tính</span>
+                                <span class="fw-medium">@order?.TotalAmount.ToString("N0") đ</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="text-muted small">Phí vận chuyển</span>
+                                <span class="text-success small fw-bold">Miễn phí</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                                <span class="fw-bold text-dark">TỔNG CỘNG</span>
+                                <span class="fs-3 fw-bold text-primary">@order?.TotalAmount.ToString("N0") <small class="fs-6">đ</small></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function cancelOrder(id) {
+            if (confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?')) {
+                $.ajax({
+                    url: '/Order/Cancel/' + id,
+                    type: 'POST',
+                    data: {
+                        "__RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (res) {
+                        if (res.success) {
+                            alert(res.message);
+                            location.reload();
+                        } else {
+                            alert(res.message);
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+}

@@ -1,0 +1,17 @@
+D:\WEB\SV22T1020697\SV22T1020697.BusinessLayers\bin\Debug\net8.0\SV22T1020697.BusinessLayers.deps.json
+D:\WEB\SV22T1020697\SV22T1020697.BusinessLayers\bin\Debug\net8.0\SV22T1020697.BusinessLayers.dll
+D:\WEB\SV22T1020697\SV22T1020697.BusinessLayers\bin\Debug\net8.0\SV22T1020697.BusinessLayers.pdb
+D:\WEB\SV22T1020697\SV22T1020697.BusinessLayers\bin\Debug\net8.0\SV22T1020697.DataLayers.dll
+D:\WEB\SV22T1020697\SV22T1020697.BusinessLayers\bin\Debug\net8.0\SV22T1020697.Models.dll
+D:\WEB\SV22T1020697\SV22T1020697.BusinessLayers\bin\Debug\net8.0\SV22T1020697.DataLayers.pdb
+D:\WEB\SV22T1020697\SV22T1020697.BusinessLayers\bin\Debug\net8.0\SV22T1020697.Models.pdb
+D:\WEB\SV22T1020697\SV22T1020697.BusinessLayers\obj\Debug\net8.0\SV22T1020697.BusinessLayers.csproj.AssemblyReference.cache
+D:\WEB\SV22T1020697\SV22T1020697.BusinessLayers\obj\Debug\net8.0\SV22T1020697.BusinessLayers.GeneratedMSBuildEditorConfig.editorconfig
+D:\WEB\SV22T1020697\SV22T1020697.BusinessLayers\obj\Debug\net8.0\SV22T1020697.BusinessLayers.AssemblyInfoInputs.cache
+D:\WEB\SV22T1020697\SV22T1020697.BusinessLayers\obj\Debug\net8.0\SV22T1020697.BusinessLayers.AssemblyInfo.cs
+D:\WEB\SV22T1020697\SV22T1020697.BusinessLayers\obj\Debug\net8.0\SV22T1020697.BusinessLayers.csproj.CoreCompileInputs.cache
+D:\WEB\SV22T1020697\SV22T1020697.BusinessLayers\obj\Debug\net8.0\SV22T102.825B8E28.Up2Date
+D:\WEB\SV22T1020697\SV22T1020697.BusinessLayers\obj\Debug\net8.0\SV22T1020697.BusinessLayers.dll
+D:\WEB\SV22T1020697\SV22T1020697.BusinessLayers\obj\Debug\net8.0\refint\SV22T1020697.BusinessLayers.dll
+D:\WEB\SV22T1020697\SV22T1020697.BusinessLayers\obj\Debug\net8.0\SV22T1020697.BusinessLayers.pdb
+D:\WEB\SV22T1020697\SV22T1020697.BusinessLayers\obj\Debug\net8.0\ref\SV22T1020697.BusinessLayers.dll

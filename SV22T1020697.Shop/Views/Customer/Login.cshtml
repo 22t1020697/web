@@ -1,0 +1,298 @@
+﻿@using Microsoft.AspNetCore.Http
+@{
+    string currentPath = Context.Request.Path.Value ?? "";
+    bool isRegister = currentPath.Contains("Register", StringComparison.OrdinalIgnoreCase);
+    ViewData["Title"] = isRegister ? "Đăng ký tài khoản" : "Đăng nhập hệ thống";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    :root {
+        --primary-color: #2b5d8d;
+        --secondary-color: #007bff;
+        --accent-color: #ff5722;
+        --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        --text-main: #2d3436;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* 1. NỀN PHỦ HIỆN ĐẠI */
+    .auth-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: var(--bg-gradient); /* Thay đổi từ đen mờ sang gradient sang trọng */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    /* 2. THẺ CARD CHI TIẾT (Đồng bộ với Product Detail) */
+    .auth-card {
+        background: #ffffff;
+        width: 95%;
+        max-width: 400px; /* Tăng độ rộng một chút cho thoáng */
+        border-radius: 24px; /* Bo góc lớn cực đẹp */
+        box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        overflow: hidden;
+        animation: authSlideUp 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
+    @@keyframes authSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* 3. TABS ĐIỀU HƯỚNG */
+    .auth-tabs {
+        display: flex;
+        background: #f8fafc;
+        padding: 8px;
+        gap: 5px;
+    }
+
+    .auth-tab {
+        flex: 1;
+        text-align: center;
+        padding: 12px 0;
+        font-weight: 700;
+        text-decoration: none;
+        color: var(--text-muted);
+        font-size: 13px;
+        border-radius: 16px;
+        transition: all 0.3s;
+    }
+
+        .auth-tab.active {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+    /* 4. NỘI DUNG FORM */
+    .auth-body {
+        padding: 40px 35px;
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+        .auth-header h2 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .auth-header p {
+            font-size: 14px;
+            color: #636e72;
+            margin-top: 8px;
+        }
+
+    /* 5. INPUT CUSTOM (Đồng bộ kiểu dáng hiện đại) */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .label-custom {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #2d3436;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #b2bec3;
+            transition: color 0.3s;
+        }
+
+    .input-custom {
+        width: 100%;
+        padding: 14px 15px 14px 45px;
+        border: 2px solid #f1f3f5;
+        border-radius: 14px;
+        outline: none;
+        font-size: 14px;
+        font-family: 'Inter', sans-serif;
+        background: #f8fafc;
+        transition: all 0.3s;
+        box-sizing: border-box;
+    }
+
+        .input-custom:focus {
+            border-color: var(--primary-color);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(43, 93, 141, 0.1);
+        }
+
+            .input-custom:focus + i {
+                color: var(--primary-color);
+            }
+
+    /* 6. NÚT BẤM GRADIENT */
+    .btn-submit {
+        background: linear-gradient(45deg, var(--primary-color), #4a90e2);
+        color: white;
+        border: none;
+        width: 100%;
+        padding: 16px;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 15px;
+        cursor: pointer;
+        margin-top: 10px;
+        box-shadow: 0 6px 20px rgba(43, 93, 141, 0.3);
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(43, 93, 141, 0.4);
+        }
+
+    /* 7. ALERT CUSTOM */
+    .alert-custom {
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .alert-danger-custom {
+        background: #fff5f5;
+        color: #e03131;
+        border: 1px solid #ffc9c9;
+    }
+
+    .alert-success-custom {
+        background: #f4fce3;
+        color: #2f9e44;
+        border: 1px solid #d8f5a2;
+    }
+
+    .btn-back-home {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 25px;
+        color: #b2bec3;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+
+        .btn-back-home:hover {
+            color: var(--primary-color);
+        }
+</style>
+
+<div class="auth-overlay">
+    <div class="auth-card">
+        <div class="auth-tabs">
+            <a asp-action="Login" class="auth-tab @(!isRegister ? "active" : "")">
+                Đăng nhập
+            </a>
+            <a asp-action="Register" class="auth-tab @(isRegister ? "active" : "")">
+                Đăng ký mới
+            </a>
+        </div>
+
+        <div class="auth-body">
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="alert-custom alert-danger-custom">
+                    <i class="fa-solid fa-circle-exclamation"></i> @ViewBag.ErrorMessage
+                </div>
+            }
+            @if (ViewBag.SuccessMessage != null)
+            {
+                <div class="alert-custom alert-success-custom">
+                    <i class="fa-solid fa-circle-check"></i> @ViewBag.SuccessMessage
+                </div>
+            }
+
+            <div class="auth-header">
+                <h2>@(isRegister ? "Tạo tài khoản" : "Chào mừng bạn!")</h2>
+                <p>@(isRegister ? "Trở thành thành viên để nhận ưu đãi" : "Vui lòng đăng nhập để tiếp tục mua sắm")</p>
+            </div>
+
+            <form asp-action="@(isRegister ? "Register" : "Login")" method="post" autocomplete="off">
+                <input style="display:none" type="text" name="fakeusernameremembered" />
+                <input style="display:none" type="password" name="fakepasswordremembered" />
+
+                <div class="form-group">
+                    <label class="label-custom">Email</label>
+                    <div class="input-wrapper">
+                        <i class="fa-regular fa-envelope"></i>
+                        <input type="email" name="email" class="input-custom" placeholder="" required>
+                    </div>
+                </div>
+
+                @if (isRegister)
+                {
+                    <div class="form-group">
+                        <label class="label-custom">Số điện thoại</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-phone"></i>
+                            <input type="tel" name="phone" class="input-custom" placeholder="" required>
+                        </div>
+                    </div>
+                }
+
+                <div class="form-group">
+                    <label class="label-custom">Mật khẩu</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" name="password" class="input-custom" placeholder="" required autocomplete="@(isRegister ? "new-password" : "current-password")">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    @(isRegister ? "Đăng ký ngay" : "Đăng nhập")
+                </button>
+            </form>
+
+            <a asp-controller="Home" asp-action="Index" class="btn-back-home">
+                <i class="fa-solid fa-arrow-left-long"></i> Quay lại cửa hàng
+            </a>
+        </div>
+    </div>
+</div>

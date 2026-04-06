@@ -1,0 +1,109 @@
+﻿@{
+    ViewBag.Title = "Cập nhật sản phẩm trong đơn hàng";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-7">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-warning bg-gradient py-3">
+                    <h5 class="mb-0 fw-bold text-dark text-center">
+                        <i class="bi bi-pencil-square me-2"></i>CHỈNH SỬA THÔNG TIN SẢN PHẨM
+                    </h5>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center bg-light rounded p-3 mb-4 border-start border-4 border-warning">
+                        <img src="https://images.pexels.com/photos/16347/pexels-photo.jpg"
+                             class="rounded shadow-sm me-3"
+                             style="width:80px; height:80px; object-fit:cover" />
+                        <div>
+                            <h5 class="fw-bold text-primary mb-1">Macbook Pro 14" M2 2023</h5>
+                            <span class="badge bg-secondary">ĐVT: Cái</span>
+                            <small class="text-muted d-block mt-1">Mã đơn hàng: #12345</small>
+                        </div>
+                    </div>
+
+                    <form action="/Order/EditProduct/1" method="post">
+                        <input type="hidden" name="ProductId" value="101" />
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Số lượng bán</label>
+                                <div class="input-group input-group-lg">
+                                    <button class="btn btn-outline-secondary" type="button" id="btnMinus"><i class="bi bi-dash-lg"></i></button>
+                                    <input type="number" name="Quantity" id="inputQuantity"
+                                           class="form-control text-center fw-bold"
+                                           value="1" min="1" step="1">
+                                    <button class="btn btn-outline-secondary" type="button" id="btnPlus"><i class="bi bi-plus-lg"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Đơn giá niêm yết</label>
+                                <div class="input-group input-group-lg">
+                                    <input type="text" name="Price" id="inputPrice"
+                                           class="form-control text-end fw-bold text-danger"
+                                           value="42,500,000">
+                                    <span class="input-group-text small">VND</span>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <div class="alert alert-info border-0 d-flex justify-content-between align-items-center py-3 px-4 shadow-sm">
+                                    <span class="fw-bold"><i class="bi bi-calculator me-2"></i>THÀNH TIỀN TẠM TÍNH:</span>
+                                    <span class="fs-4 fw-bold text-primary" id="tempTotal">42,500,000 VND</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4 mt-2">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Ghi chú cho sản phẩm (Màu sắc, cấu hình...)</label>
+                            <textarea class="form-control" rows="2" placeholder="Ví dụ: Màu Space Gray, RAM 16GB...">Màu: Space Gray</textarea>
+                        </div>
+
+                        <div class="row g-2 mt-2">
+                            <div class="col-6">
+                                <a href="/Order/Detail/1" class="btn btn-light border w-100 py-2 fw-semibold">
+                                    <i class="bi bi-arrow-left me-1"></i>Hủy bỏ
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow">
+                                    <i class="bi bi-save me-1"></i>CẬP NHẬT NGAY
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-footer bg-white border-top text-center py-3">
+                    <small class="text-muted italic">
+                        <i class="bi bi-shield-check me-1"></i>Giá và số lượng sẽ được tính vào tổng hóa đơn sau khi lưu.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const inputQty = document.getElementById('inputQuantity');
+    const inputPrice = document.getElementById('inputPrice');
+    const tempTotal = document.getElementById('tempTotal');
+
+    function calculate() {
+        let qty = parseInt(inputQty.value) || 0;
+        let price = parseFloat(inputPrice.value.replace(/,/g, '')) || 0;
+        let total = qty * price;
+        tempTotal.innerText = total.toLocaleString('en-US') + " VND";
+    }
+
+    document.getElementById('btnPlus').addEventListener('click', () => { inputQty.value = parseInt(inputQty.value) + 1; calculate(); });
+    document.getElementById('btnMinus').addEventListener('click', () => { if(inputQty.value > 1) inputQty.value = parseInt(inputQty.value) - 1; calculate(); });
+    inputQty.addEventListener('input', calculate);
+    inputPrice.addEventListener('input', calculate);
+</script>

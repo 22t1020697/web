@@ -1,0 +1,15 @@
+D:\WEB\SV22T1020697\SV22T1020697.DomainModels\bin\Debug\net8.0\SV22T1020697.DomainModels.deps.json
+D:\WEB\SV22T1020697\SV22T1020697.DomainModels\bin\Debug\net8.0\SV22T1020697.DomainModels.dll
+D:\WEB\SV22T1020697\SV22T1020697.DomainModels\bin\Debug\net8.0\SV22T1020697.DomainModels.pdb
+D:\WEB\SV22T1020697\SV22T1020697.DomainModels\obj\Debug\net8.0\SV22T1020697.DomainModels.GeneratedMSBuildEditorConfig.editorconfig
+D:\WEB\SV22T1020697\SV22T1020697.DomainModels\obj\Debug\net8.0\SV22T1020697.DomainModels.AssemblyInfoInputs.cache
+D:\WEB\SV22T1020697\SV22T1020697.DomainModels\obj\Debug\net8.0\SV22T1020697.DomainModels.AssemblyInfo.cs
+D:\WEB\SV22T1020697\SV22T1020697.DomainModels\obj\Debug\net8.0\SV22T1020697.DomainModels.csproj.CoreCompileInputs.cache
+D:\WEB\SV22T1020697\SV22T1020697.DomainModels\obj\Debug\net8.0\SV22T1020697.DomainModels.dll
+D:\WEB\SV22T1020697\SV22T1020697.DomainModels\obj\Debug\net8.0\refint\SV22T1020697.DomainModels.dll
+D:\WEB\SV22T1020697\SV22T1020697.DomainModels\obj\Debug\net8.0\SV22T1020697.DomainModels.pdb
+D:\WEB\SV22T1020697\SV22T1020697.DomainModels\obj\Debug\net8.0\ref\SV22T1020697.DomainModels.dll
+D:\WEB\SV22T1020697\SV22T1020697.DomainModels\bin\Debug\net8.0\SV22T1020697.Models.dll
+D:\WEB\SV22T1020697\SV22T1020697.DomainModels\bin\Debug\net8.0\SV22T1020697.Models.pdb
+D:\WEB\SV22T1020697\SV22T1020697.DomainModels\obj\Debug\net8.0\SV22T1020697.DomainModels.csproj.AssemblyReference.cache
+D:\WEB\SV22T1020697\SV22T1020697.DomainModels\obj\Debug\net8.0\SV22T102.E759D1A8.Up2Date

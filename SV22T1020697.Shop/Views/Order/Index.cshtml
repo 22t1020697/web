@@ -1,0 +1,293 @@
+﻿@model IEnumerable<SV22T1020697.Models.Sales.CartItem>
+
+@{
+    ViewData["Title"] = "Xác nhận đơn hàng";
+    var cartItems = Model ?? new List<SV22T1020697.Models.Sales.CartItem>();
+    decimal totalOrder = cartItems.Sum(m => m.TotalPrice);
+
+    string customerName = "";
+    string customerProvince = "";
+    string customerAddress = "";
+
+    var customer = ViewBag.Customer as dynamic;
+    if (customer != null)
+    {
+        customerName = customer.CustomerName?.ToString() ?? "";
+        customerProvince = customer.Province?.ToString() ?? "";
+        customerAddress = customer.Address?.ToString() ?? "";
+    }
+
+    var provinceList = ViewBag.ProvinceList as List<SelectListItem> ?? new List<SelectListItem>();
+}
+
+<style>
+    :root {
+        --sky-blue: #66CCFF;
+        --sky-blue-light: #e6f7ff;
+        --sky-blue-dark: #4db8ff;
+        --text-main: #2d3748;
+        --bg-body: #f0f4f8;
+    }
+
+    body {
+        background-color: var(--bg-body) !important;
+        color: var(--text-main);
+        font-family: 'Inter', -apple-system, sans-serif;
+    }
+
+    /* Container chính */
+    .checkout-container {
+        max-width: 1100px;
+        margin: 50px auto;
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 20px 40px rgba(102, 204, 255, 0.15);
+        overflow: hidden;
+        border: 1px solid rgba(102, 204, 255, 0.2);
+    }
+
+    /* Header với màu #66CCFF */
+    .header-gradient {
+        background: var(--sky-blue);
+        padding: 40px 20px;
+        text-align: center;
+        color: white;
+    }
+
+        .header-gradient h2 {
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+    /* Section Styling */
+    .content-padding {
+        padding: 40px;
+    }
+
+    .section-head {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--sky-blue-dark);
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Form Input hiện đại */
+    .modern-input {
+        background: #f8fafc;
+        border: 2px solid #edf2f7;
+        border-radius: 12px;
+        padding: 14px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+        .modern-input:focus {
+            background: #fff;
+            border-color: var(--sky-blue);
+            box-shadow: 0 0 0 4px rgba(102, 204, 255, 0.15);
+            outline: none;
+        }
+
+    /* Item đơn hàng */
+    .order-item {
+        display: flex;
+        align-items: center;
+        background: #fbfcfd;
+        border-radius: 15px;
+        padding: 12px;
+        margin-bottom: 12px;
+        border: 1px solid #f0f4f8;
+    }
+
+        .order-item img {
+            width: 65px;
+            height: 65px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-right: 15px;
+            background: white;
+        }
+
+    /* Tổng kết hóa đơn */
+    .bill-box {
+        background: var(--sky-blue-light);
+        border-radius: 20px;
+        padding: 25px;
+        margin-top: 20px;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 2px solid rgba(102, 204, 255, 0.2);
+    }
+
+    .final-price {
+        font-size: 1.7rem;
+        font-weight: 900;
+        color: var(--sky-blue-dark);
+    }
+
+    /* Nút xác nhận to rõ */
+    .btn-submit-order {
+        background: var(--sky-blue);
+        color: white;
+        border: none;
+        width: 100%;
+        padding: 18px;
+        border-radius: 15px;
+        font-weight: 800;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(102, 204, 255, 0.3);
+    }
+
+        .btn-submit-order:hover {
+            background: var(--sky-blue-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(102, 204, 255, 0.4);
+        }
+
+    /* Radio button thanh toán */
+    .payment-card {
+        border: 2px solid #edf2f7;
+        border-radius: 15px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background: white;
+        cursor: pointer;
+    }
+
+        .payment-card.selected {
+            border-color: var(--sky-blue);
+            background: var(--sky-blue-light);
+        }
+</style>
+
+<div class="container">
+    <div class="checkout-container">
+        <div class="header-gradient">
+            <i class="bi bi-cart-check-fill" style="font-size: 3rem;"></i>
+            <h2 class="mt-2">Xác Nhận Đơn Hàng</h2>
+        </div>
+
+        <form asp-controller="Order" asp-action="Checkout" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="selectedIds" value="@ViewBag.SelectedIds" />
+
+            <div class="row g-0">
+                <div class="col-lg-7 content-padding border-end">
+                    <div class="section-head">
+                        <i class="bi bi-person-circle"></i> THÔNG TIN GIAO HÀNG
+                    </div>
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger border-0 rounded-3 small">
+                            <div asp-validation-summary="All"></div>
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Họ và tên</label>
+                        <input type="text" class="form-control modern-input" name="deliveryName" value="@customerName" placeholder="Tên người nhận hàng" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Tỉnh / Thành phố</label>
+                        <select class="form-select modern-input" name="deliveryProvince" required>
+                            <option value="">-- Chọn Tỉnh / Thành phố --</option>
+                            @foreach (var item in provinceList)
+                            {
+                                bool isSelected = (item?.Value != null && item.Value == customerProvince);
+                                <option value="@(item?.Value ?? "")" selected="@isSelected">@(item?.Text ?? "")</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Địa chỉ nhận hàng</label>
+                        <textarea class="form-control modern-input" name="deliveryAddress" rows="3" placeholder="Số nhà, tên đường, phường/xã..." required>@customerAddress</textarea>
+                    </div>
+
+                    <div class="section-head">
+                        <i class="bi bi-wallet2"></i> PHƯƠNG THỨC THANH TOÁN
+                    </div>
+
+                    <div class="payment-card selected">
+                        <input type="radio" checked id="cod" style="width:20px; height:20px; accent-color: var(--sky-blue);">
+                        <label for="cod" class="m-0 cursor-pointer">
+                            <span class="fw-bold d-block">Thanh toán khi nhận hàng (COD)</span>
+                            <span class="text-muted small">Bạn chỉ trả tiền khi đã cầm hàng trên tay.</span>
+                        </label>
+                    </div>
+
+                    <div class="mt-4">
+                        <a asp-controller="Cart" asp-action="Index" class="text-muted small text-decoration-none">
+                            <i class="bi bi-arrow-left"></i> Quay lại giỏ hàng
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-5 content-padding bg-light bg-opacity-25">
+                    <div class="section-head">
+                        <i class="bi bi-bag-check"></i> GIỎ HÀNG (@cartItems.Count())
+                    </div>
+
+                    <div style="max-height: 350px; overflow-y: auto; padding-right: 5px;">
+                        @foreach (var item in cartItems)
+                        {
+                            <div class="order-item">
+                                <img src="~/images/products/@(string.IsNullOrEmpty(item.Photo) ? "nophoto.png" : item.Photo)" onerror="this.src='/images/products/nophoto.png'">
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold small text-truncate" style="max-width: 150px;">@item.ProductName</div>
+                                    <div class="text-muted small">SL: @item.Quantity</div>
+                                </div>
+                                <div class="fw-bold text-primary">
+                                    @item.TotalPrice.ToString("N0") đ
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="bill-box">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Tạm tính:</span>
+                            <span class="fw-bold">@totalOrder.ToString("N0") đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Phí vận chuyển:</span>
+                            <span class="text-success fw-bold">Free</span>
+                        </div>
+
+                        <div class="total-row">
+                            <span class="fw-bold">TỔNG CỘNG:</span>
+                            <span class="final-price">@totalOrder.ToString("N0") đ</span>
+                        </div>
+
+                        <button type="submit" class="btn-submit-order mt-4">
+                            ĐẶT HÀNG NGAY <i class="bi bi-send-fill ms-2"></i>
+                        </button>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted"><i class="bi bi-shield-lock"></i> Thanh toán an toàn 100%</small>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

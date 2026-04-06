@@ -1,0 +1,95 @@
+﻿@using SV22T1020697.Models.Partner
+@model Customer
+@{
+    ViewBag.Title = "Xóa khách hàng";
+
+    bool allowDelete = ViewBag.AllowDelete ?? false;
+}
+
+@section PageToolBar {
+    @if (allowDelete)
+    {
+        <button type="submit" form="formDelete" class="btn btn-danger">
+            <i class="bi bi-trash me-1"></i>
+            Xóa
+        </button>
+    }
+    else
+    {
+        <button type="button" class="btn btn-danger" disabled>
+            <i class="bi bi-trash me-1"></i> Xóa
+        </button>
+    }
+
+    <a href="~/Customer" class="btn btn-secondary ms-1">
+        <i class="bi bi-arrow-left"></i>
+        Quay lại
+    </a>
+}
+
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="card card-danger card-outline">
+            <div class="card-header">
+                <h5 class="card-title mb-0 text-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Xác nhận xóa khách hàng
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <!-- FIX FORM -->
+                <form id="formDelete" method="post" action="~/Customer/Delete/@Model.CustomerID">
+
+                    @if (!allowDelete)
+                    {
+                        <div class="alert alert-warning d-flex align-items-center">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Khách hàng này đang được sử dụng, không thể xóa!
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Việc xóa khách hàng này sẽ không thể hoàn tác. Bạn có chắc chắn muốn tiếp tục?
+                        </div>
+                    }
+
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Tên khách hàng</dt>
+                        <dd class="col-sm-8">@Model.CustomerName</dd>
+
+                        <dt class="col-sm-4">Tên giao dịch</dt>
+                        <dd class="col-sm-8">@Model.ContactName</dd>
+
+                        <dt class="col-sm-4">Trạng thái</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsLocked)
+                            {
+                                <span class="badge bg-danger">Đã bị khoá</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Đang hoạt động</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Điện thoại</dt>
+                        <dd class="col-sm-8">@Model.Phone</dd>
+
+                        <dt class="col-sm-4">Email</dt>
+                        <dd class="col-sm-8">@Model.Email</dd>
+
+                        <dt class="col-sm-4">Địa chỉ</dt>
+                        <dd class="col-sm-8">@Model.Address</dd>
+
+                        <dt class="col-sm-4">Tỉnh / Thành</dt>
+                        <dd class="col-sm-8">@Model.Province</dd>
+                    </dl>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

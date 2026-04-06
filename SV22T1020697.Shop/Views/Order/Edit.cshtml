@@ -1,0 +1,147 @@
+﻿@model SV22T1020697.Models.Sales.OrderItemModel
+@{
+    ViewData["Title"] = "Chỉnh sửa giao hàng #" + Model.OrderID;
+}
+
+<style>
+    body {
+        background-color: #f8fafc;
+        color: #334155;
+    }
+
+    .edit-card {
+        border: none;
+        border-radius: 16px;
+        background: #ffffff;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-header {
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 20px;
+    }
+
+    .form-label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #64748b;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .form-control, .form-select {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-control[readonly] {
+            background-color: #f1f5f9;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+    .btn-update {
+        background-color: #4f46e5;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        transition: all 0.2s ease;
+    }
+
+        .btn-update:hover {
+            background-color: #4338ca;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+    .btn-cancel {
+        background-color: #ffffff;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+    }
+
+        .btn-cancel:hover {
+            background-color: #f8fafc;
+            color: #1e293b;
+            border-color: #cbd5e1;
+        }
+</style>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7">
+            <div class="mb-3 px-1">
+                <a asp-action="Detail" asp-route-id="@Model.OrderID" class="text-decoration-none text-muted small fw-bold">
+                    <i class="bi bi-chevron-left"></i> QUAY LẠI ĐƠN HÀNG
+                </a>
+            </div>
+
+            <div class="edit-card p-4 p-md-5">
+                <div class="form-header mb-4 text-center text-md-start">
+                    <h4 class="fw-extrabold text-indigo-900 m-0" style="color: #1e1b4b;">Sửa thông tin giao hàng</h4>
+                    <p class="text-muted small mt-1">Cập nhật địa chỉ nhận hàng cho đơn #@Model.OrderID</p>
+                </div>
+
+                <form asp-action="Update" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="orderId" value="@Model.OrderID" />
+
+                    <div class="mb-4">
+                        <label class="form-label">Mã đơn hàng</label>
+                        <input type="text" class="form-control" value="#@Model.OrderID" readonly />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Tên người nhận</label>
+                        <input type="text" name="deliveryName" class="form-control"
+                               value="@(Model.CustomerName)" required placeholder="Nhập tên người nhận" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Tỉnh / Thành phố</label>
+                        <select name="deliveryProvince" class="form-select" required>
+                            <option value="">-- Chọn Tỉnh / Thành phố --</option>
+                            @foreach (var item in (List<SelectListItem>)ViewBag.ProvinceList)
+                            {
+                                <option value="@item.Value" selected="@(item.Value == Model.DeliveryProvince)">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="form-label">Địa chỉ chi tiết</label>
+                        <textarea name="deliveryAddress" class="form-control" rows="3" required
+                                  placeholder="Số nhà, tên đường, phường/xã...">@Model.DeliveryAddress</textarea>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-8">
+                            <button type="submit" class="btn btn-update w-100 text-uppercase">Cập nhật đơn hàng</button>
+                        </div>
+                        <div class="col-4">
+                            <a asp-action="Detail" asp-route-id="@Model.OrderID" class="btn btn-cancel w-100 text-center text-uppercase">Hủy</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,553 @@
+﻿@using SV22T1020697.Models.Catalog
+@using Microsoft.AspNetCore.Http
+@using SV22T1020697.Shop
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - QN STORE</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        :root {
+            --header-footer-bg: #2b5d8d;
+            --accent-color: #00d4ff;
+            --primary-blue: #007bff;
+            --bg-body: #f4f7f9;
+            --sidebar-bg: #ffffff;
+            --text-dark: #2d3436;
+            --qn-red: #cc0000;
+        }
+        /* --- HIỆU ỨNG CHỮ NỔI 3D MÀU XANH --- */
+        .text-3d-cyan {
+            color: #00FFFF !important; /* Màu xanh lơ bạn muốn */
+            font-weight: 900 !important;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            /* Hiệu ứng đổ bóng nhiều lớp tạo độ dày khối 3D */
+            text-shadow: 0 1px 0 #00E5E5, 0 2px 0 #00CCCC, 0 3px 0 #00B2B2, 0 4px 0 #009999, 0 5px 0 #007F7F, 0 6px 1px rgba(0,0,0,.1), 0 0 5px rgba(0,0,0,.1), 0 1px 3px rgba(0,0,0,.3), 0 3px 5px rgba(0,0,0,.2), 0 5px 10px rgba(0,0,0,.25);
+            transition: all 0.3s ease;
+        }
+
+            .text-3d-cyan:hover {
+                transform: scale(1.05); /* Phóng nhẹ khi di chuột vào */
+                color: #33FFFF !important;
+                text-shadow: 0 0 15px rgba(0, 255, 255, 0.6); /* Hiệu ứng phát sáng */
+            }
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-dark);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* --- BANNER HOME --- */
+        .home-banner {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?auto=format&fit=crop&q=80&w=2000');
+            background-size: cover;
+            background-position: center;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            margin-bottom: 0;
+        }
+
+            .home-banner h1 {
+                font-size: 3rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                text-shadow: 2px 2px 10px rgba(0,0,0,0.7);
+            }
+
+        /* --- NAV HIGHLIGHT --- */
+        .nav-link.active-menu {
+            color: var(--accent-color) !important;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar-wrapper {
+            background: var(--sidebar-bg);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e1e8ed;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 90px;
+        }
+
+        .filter-main-title {
+            color: var(--qn-red);
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            display: block;
+        }
+
+        .filter-group-label {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #333;
+            margin-bottom: 12px;
+            display: block;
+            text-transform: uppercase;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+            .filter-item input[type="radio"] {
+                width: 17px;
+                height: 17px;
+                margin-right: 10px;
+                cursor: pointer;
+                accent-color: var(--primary-blue);
+            }
+
+            .filter-item label {
+                font-size: 0.9rem;
+                color: #444;
+                cursor: pointer;
+                user-select: none;
+                flex-grow: 1;
+            }
+
+            .filter-item:hover label {
+                color: var(--primary-blue);
+            }
+
+        .price-range-inputs {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+            .price-range-inputs input {
+                font-size: 0.8rem;
+                padding: 5px;
+                text-align: center;
+                font-weight: 600;
+            }
+
+        .btn-apply-filter {
+            background: var(--primary-blue);
+            border: none;
+            color: white;
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            margin-top: 15px;
+            transition: 0.3s;
+        }
+
+            .btn-apply-filter:hover {
+                background: #0056b3;
+                box-shadow: 0 4px 10px rgba(0,123,255,0.3);
+            }
+
+        /* --- NEW FOOTER STYLES --- */
+        .custom-footer {
+            /* ĐÃ CHỈNH SỬA: Đổi màu nền footer từ #1a1a1a sang màu xanh đồng bộ với header */
+            background-color: var(--header-footer-bg) !important;
+            color: #ecf0f1 !important;
+            border-top: 4px solid var(--accent-color);
+            padding-top: 60px;
+        }
+
+        .footer-title {
+            position: relative;
+            padding-bottom: 12px;
+            margin-bottom: 25px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+            .footer-title::after {
+                content: '';
+                position: absolute;
+                left: 0;
+                bottom: 0;
+                width: 40px;
+                height: 3px;
+                background: var(--accent-color);
+            }
+
+        .footer-link {
+            transition: 0.3s;
+            display: block;
+            margin-bottom: 12px;
+            color: rgba(255,255,255,0.6) !important;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+
+            .footer-link:hover {
+                color: var(--accent-color) !important;
+                padding-left: 8px;
+            }
+
+        .footer-contact-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            color: rgba(255,255,255,0.7);
+        }
+
+            .footer-contact-item i {
+                color: var(--accent-color);
+                margin-right: 12px;
+                margin-top: 4px;
+            }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 50%;
+            margin-right: 10px;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+
+            .social-links a:hover {
+                background: var(--accent-color);
+                transform: translateY(-3px);
+                color: #000;
+            }
+
+        .footer-bottom {
+            background: rgba(0,0,0,0.2);
+            padding: 20px 0;
+            margin-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="top-bar-art d-none d-lg-block" style="background-color: var(--header-footer-bg)">
+            <div class="container d-flex justify-content-between align-items-center py-2">
+                <div class="contact-info">
+                    <span class="fw-bold text-white small"><i class="fa fa-envelope-open-text me-2 text-info"></i> support@qnstore.vn</span>
+                    <span class="ms-4 fw-bold text-white small"><i class="fa fa-headset me-2 text-info"></i> Hot-line: 1900 1010</span>
+                </div>
+                <div class="top-links">
+                    <a href="#" class="text-white text-decoration-none small fw-bold me-3">Tin tức</a>
+                    <a href="#" class="text-white text-decoration-none small fw-bold">Liên hệ</a>
+                </div>
+            </div>
+        </div>
+
+        <nav class="navbar navbar-expand-lg sticky-top custom-navbar" style="background-color: #1a1a1a">
+            <div class="container">
+                <a class="navbar-brand logo-text fw-bolder text-white fs-3" href="/">QN <span style="color:var(--accent-color)">STORE</span></a>
+                <button class="navbar-toggler btn-info" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <div class="mx-auto d-flex align-items-center">
+                        <form action="/Product" method="get" class="d-flex me-4">
+                            <div class="input-group">
+                                <input type="text" name="searchValue" value="@ViewBag.CurrentSearchValue"
+                                       class="form-control fw-bold border-0" placeholder="Tìm sản phẩm..." style="width: 250px;">
+                                <button type="submit" class="btn btn-info text-white"><i class="fa fa-search"></i></button>
+                            </div>
+                        </form>
+                        <ul class="navbar-nav gap-3">
+                            <li class="nav-item">
+                                <a class="nav-link text-white fw-bold @(Context.Request.Path == "/" ? "active-menu" : "")" href="/">Trang chủ</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white fw-bold @(Context.Request.Path.ToString().StartsWith("/Product") ? "active-menu" : "")" href="/Product">Sản phẩm</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-4">
+                        <a href="/Cart" class="text-decoration-none fw-bold text-white position-relative">
+                            <i class="fa fa-shopping-basket fs-5 text-info"></i>
+                            <span class="d-none d-xl-inline ms-1 text-white">Giỏ hàng</span>
+                            <span id="cart-count" class="badge rounded-pill bg-danger cart-badge">
+                                @(ShoppingCartHelper.GetShoppingCart().Count)
+                            </span>
+                        </a>
+
+                        <div class="dropdown user-dropdown">
+                            @{
+                                var customerName = Context.Session.GetString("CustomerName");
+                            }
+                            @if (!string.IsNullOrEmpty(customerName))
+                            {
+                                <button class="btn btn-info btn-sm dropdown-toggle fw-bold text-white px-3" type="button" data-bs-toggle="dropdown">
+                                    <i class="fa fa-user-circle me-1"></i> @customerName
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow">
+                                    <li><a class="dropdown-item" asp-controller="Order" asp-action="History"><i class="bi bi-bag-check me-2"></i>Lịch sử đơn hàng</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Customer" asp-action="Profile"><i class="bi bi-person me-2"></i>Hồ sơ cá nhân</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" asp-controller="Customer" asp-action="Logout"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
+                                </ul>
+                            }
+                            else
+                            {
+                                <button class="btn btn-outline-info btn-sm dropdown-toggle fw-bold text-white px-3" type="button" data-bs-toggle="dropdown">
+                                    <i class="fa fa-user-lock me-1"></i> Tài khoản
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow">
+                                    <li><a class="dropdown-item" asp-controller="Customer" asp-action="Login"><i class="bi bi-box-arrow-in-right me-2 text-info"></i>Đăng nhập</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Customer" asp-action="Register"><i class="bi bi-person-plus me-2 text-success"></i>Đăng ký</a></li>
+                                </ul>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+   @if (Context.Request.Path == "/")
+    {
+        <section class="home-banner">
+            <div class="container">
+                <h1 class="text-3d-cyan">QN STORE</h1>
+                <h1 class="text-3d-cyan" style="font-size: 2.5rem;">Thế Giới Mua Sắm Của Bạn </h1>
+            </div>
+        </section>
+    }
+
+    <main id="main" class="container py-5">
+        <div class="row g-4">
+            @{
+                var currentPath = Context.Request.Path.ToString().ToLower();
+                bool showSidebar = currentPath.StartsWith("/product");
+                var currentCatId = ViewBag.CurrentCategoryID;
+            }
+
+            @if (showSidebar)
+            {
+                <aside class="col-lg-3">
+                    <div class="sidebar-wrapper">
+                        <span class="filter-main-title">Lọc sản phẩm</span>
+
+                        <div class="mb-4">
+                            <span class="filter-group-label">Danh mục</span>
+                            <div class="filter-item">
+                                <input type="radio" name="catGroup" id="cat-all" value="" @(currentCatId == null || (int)currentCatId == 0 ? "checked" : "")>
+                                <label for="cat-all">Tất cả sản phẩm</label>
+                            </div>
+
+                            @if (ViewBag.Categories != null)
+                            {
+                                foreach (var cat in (IEnumerable<Category>)ViewBag.Categories)
+                                {
+                                    <div class="filter-item">
+                                        <input type="radio" name="catGroup" id="cat-@cat.CategoryID" value="@cat.CategoryID"
+                                               @(currentCatId != null && (int)currentCatId == cat.CategoryID ? "checked" : "")>
+                                        <label for="cat-@cat.CategoryID">@cat.CategoryName</label>
+                                    </div>
+                                }
+                            }
+                        </div>
+
+                        <hr>
+
+                        <div class="mt-3">
+                            <span class="filter-group-label">Khoảng giá</span>
+                            <div class="filter-item">
+                                <input type="radio" name="priceGroup" id="p1" onclick="setPrice(0, 500000)">
+                                <label for="p1">Dưới 500.000đ</label>
+                            </div>
+                            <div class="filter-item">
+                                <input type="radio" name="priceGroup" id="p2" onclick="setPrice(500000, 2000000)">
+                                <label for="p2">500.000đ - 2tr</label>
+                            </div>
+                            <div class="filter-item">
+                                <input type="radio" name="priceGroup" id="p3" onclick="setPrice(2000000, 5000000)">
+                                <label for="p3">2tr - 5tr</label>
+                            </div>
+                            <div class="filter-item">
+                                <input type="radio" name="priceGroup" id="p4" onclick="setPrice(5000000, 0)">
+                                <label for="p4">Trên 5tr</label>
+                            </div>
+
+                            <div class="price-range-inputs mt-3">
+                                @{
+                                    string minP = "";
+                                    if (ViewBag.CurrentMinPrice != null && (decimal)ViewBag.CurrentMinPrice > 0)
+                                        minP = string.Format("{0:N0}", ViewBag.CurrentMinPrice).Replace(",", ".");
+
+                                    string maxP = "";
+                                    if (ViewBag.CurrentMaxPrice != null && (decimal)ViewBag.CurrentMaxPrice > 0)
+                                        maxP = string.Format("{0:N0}", ViewBag.CurrentMaxPrice).Replace(",", ".");
+                                }
+                                <input type="text" id="minPriceDisplay" class="form-control" placeholder="Từ" oninput="formatCurrency(this)" value="@minP">
+                                <span>-</span>
+                                <input type="text" id="maxPriceDisplay" class="form-control" placeholder="Đến" oninput="formatCurrency(this)" value="@maxP">
+                            </div>
+
+                            <button type="button" onclick="applyFilters()" class="btn-apply-filter">
+                                <i class="fa fa-filter me-2"></i>Lọc ngay
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+                <div class="col-lg-9">
+                    @RenderBody()
+                </div>
+            }
+            else
+            {
+                <div class="col-12">
+                    @RenderBody()
+                </div>
+            }
+        </div>
+    </main>
+
+    <footer class="custom-footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <h4 class="footer-title fw-bold text-white">QN STORE</h4>
+                    <p class="small opacity-75 pe-md-4 mb-4" style="line-height: 1.8">
+                        QN STORE tự hào là đơn vị cung cấp các mặt hàng công nghệ hàng đầu.
+                        Chúng tôi cam kết mang đến những sản phẩm chất lượng nhất và trải nghiệm mua sắm tuyệt vời cho khách hàng.
+                    </p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h5 class="footer-title fw-bold text-white">Sản phẩm</h5>
+                    <a href="/Product" class="footer-link">Tất cả sản phẩm</a>
+                    <a href="#" class="footer-link">Sản phẩm mới</a>
+                    <a href="#" class="footer-link">Khuyến mãi</a>
+                    <a href="#" class="footer-link">Bán chạy</a>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h5 class="footer-title fw-bold text-white">Hỗ trợ</h5>
+                    <a href="#" class="footer-link">Chính sách bảo hành</a>
+                    <a href="#" class="footer-link">Chính sách đổi trả</a>
+                    <a href="#" class="footer-link">Giao hàng & Thanh toán</a>
+                    <a href="#" class="footer-link">Bảo mật thông tin</a>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="footer-title fw-bold text-white">Liên hệ với chúng tôi</h5>
+                    <div class="footer-contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span class="small">123 Đường ABC, Phường XYZ, Quận 1, TP. Hồ Chí Minh</span>
+                    </div>
+                    <div class="footer-contact-item">
+                        <i class="fas fa-phone-alt"></i>
+                        <span class="small">Hotline: 1900 1010 (8:00 - 21:00)</span>
+                    </div>
+                    <div class="footer-contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <span class="small">Email: support@qnstore.vn</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-center text-md-start">
+                        <p class="mb-0 text-white small opacity-50">© 2026 - Bản quyền thuộc về <strong>QN STORE SYSTEM</strong>.</p>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end mt-3 mt-md-0">
+                        <img src="https://theme.hstatic.net/1000306633/1000891824/14/share_pay_method_image.png?v=641" alt="Payment" style="max-height: 25px; filter: grayscale(1) brightness(2);">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const params = new URLSearchParams(window.location.search);
+            const min = params.get('minPrice') || "0";
+            const max = params.get('maxPrice') || "0";
+
+            if (document.getElementById('p1')) {
+                if (min === "0" && max === "500000") document.getElementById('p1').checked = true;
+                else if (min === "500000" && max === "2000000") document.getElementById('p2').checked = true;
+                else if (min === "2000000" && max === "5000000") document.getElementById('p3').checked = true;
+                else if (min === "5000000" && (max === "0" || max === "")) document.getElementById('p4').checked = true;
+            }
+        });
+
+        function formatCurrency(input) {
+            let cleanValue = input.value.replace(/\D/g, "");
+            if (cleanValue === "") { input.value = ""; return; }
+            input.value = cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            const radios = document.getElementsByName('priceGroup');
+            radios.forEach(r => r.checked = false);
+        }
+
+        function setPrice(min, max) {
+            document.getElementById('minPriceDisplay').value = min > 0 ? min.toLocaleString('vi-VN').replace(/,/g, ".") : "";
+            document.getElementById('maxPriceDisplay').value = max > 0 ? max.toLocaleString('vi-VN').replace(/,/g, ".") : "";
+        }
+
+        function applyFilters() {
+            const catChecked = document.querySelector('input[name="catGroup"]:checked');
+            const selectedCat = catChecked ? catChecked.value : "";
+
+            const minStr = document.getElementById('minPriceDisplay').value.replace(/\./g, "");
+            const maxStr = document.getElementById('maxPriceDisplay').value.replace(/\./g, "");
+
+            let url = new URL(window.location.origin + "/Product");
+            const currentParams = new URLSearchParams(window.location.search);
+
+            if (currentParams.has('searchValue')) {
+                url.searchParams.set('searchValue', currentParams.get('searchValue'));
+            }
+
+            if (selectedCat && selectedCat !== "0") {
+                url.searchParams.set('categoryId', selectedCat);
+            } else {
+                url.searchParams.delete('categoryId');
+            }
+
+            if (minStr) url.searchParams.set('minPrice', minStr);
+            if (maxStr) url.searchParams.set('maxPrice', maxStr);
+
+            window.location.href = url.href;
+        }
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
