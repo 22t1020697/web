@@ -413,5 +413,30 @@ namespace SV22T1020697.Admin.Controllers
             return PartialView("ShowCart", cart);
         }
 
+        /// <summary>
+        /// Lấy danh sách khách hàng dưới dạng JSON để phục vụ tìm kiếm nhanh (Ajax)
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetCustomers(string searchValue = "")
+        {
+            var input = new PaginationSearchInput()
+            {
+                Page = 1,
+                PageSize = 30,
+                SearchValue = searchValue ?? ""
+            };
+            var result = await PartnerDataService.ListCustomersAsync(input);
+            var list = result.DataItems.Select(c => new
+            {
+                id = c.CustomerID,
+                name = c.CustomerName,
+                phone = c.Phone,
+                address = c.Address,
+                province = c.Province
+            });
+            return Json(list);
+        }
+        
+    
     }
 }

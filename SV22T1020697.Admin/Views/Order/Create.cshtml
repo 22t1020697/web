@@ -112,225 +112,151 @@
 
 @section Scripts {
     <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                paginationSearch(null,
-                    document.getElementById("formSearch"),
-                    @Model.Page);
-                    showCart();
+        $(document).ready(function () {
+            // 1. Khởi tạo danh sách sản phẩm
+            doSearch(1);
+
+            // 2. Load giỏ hàng
+            showCart();
+
+            // 3. Xử lý sự kiện Submit Form Search
+            $("#formSearch").submit(function (e) {
+                e.preventDefault();
+                doSearch(1);
             });
-        // Dùng Fetch cho đồng bộ với các hàm khác
-        function showCart() {
-            fetch('/Order/ShowCart')
-                .then(res => res.text())
-                .then(html => {
-                    document.getElementById("cart").innerHTML = html;
-                })
-                .catch(err => console.error("Lỗi tải giỏ hàng:", err));
+
+            // 4. Xử lý Submit Form Lập đơn
+            $("#formCreateOrder").submit(function (e) {
+                e.preventDefault();
+                createOrder(this);
+            });
+
+            // 5. Sự kiện chọn khách hàng từ select
+            $("#customerSelect").change(selectCustomer);
+        });
+
+        function doSearch(page) {
+            var form = $("#formSearch");
+            if (typeof paginationSearch === "function") {
+                paginationSearch(null, form[0], page);
+            }
         }
 
-        // Hàm thêm sản phẩm (Bỏ chữ /API/ nếu không cần thiết)
+        function showCart() {
+            $.get('/Order/ShowCart', function (html) {
+                $("#cart").html(html);
+            }).fail(function () {
+                console.error("Lỗi tải giỏ hàng");
+            });
+        }
+
         function addCartItem(event, form) {
             event.preventDefault();
-            var formData = new FormData(form);
-            fetch("/Order/AddCartItem", {
-                method: "POST",
-                body: formData
-            })
-            .then(res => res.json())
-            .then(result => {
-                if (result.code === 1) {
-                    showCart();
-                    // alert("Thêm thành công"); // Có thể bỏ alert cho mượt
-                } else {
-                    alert(result.message);
-                }
+            var formData = $(form).serialize();
+            $.post("/Order/AddCartItem", formData, function (result) {
+                if (result.code === 1) showCart();
+                else alert(result.message);
             });
         }
-            function editCartItem(productID) {
-                console.log("ID:", productID);
 
-                fetch("/Order/EditCartItem?productId=" + productID)
-                    .then(res => {
-                        if (!res.ok) throw new Error("HTTP " + res.status);
-                        return res.text();
-                    })
-                    .then(html => {
-                        console.log(html); // xem có trả về không
+        // --- PHẦN SỬA LỖI MODAL ---
 
-                        document.getElementById("modalBody").innerHTML = html;
-
-                        var modal = new bootstrap.Modal(document.getElementById("modalCart"));
-                        modal.show();
-                    })
-                    .catch(err => {
-                        console.error("Lỗi thật:", err);
-                        alert("Lỗi mở form!");
-                    });
-            }
-
-            function deleteCartItem(productID) {
-                fetch("/Order/DeleteCartItem?productID=" + encodeURIComponent(productID), {
-                    method: "POST"
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error("Lỗi mạng");
-                    return response.json(); // nếu API trả JSON
-                })
-                .then(result => {
-                    
-                    
-                    if (result.code === 0) {
-                        alert(result.message);
-                        return;
-                    }
-
-                    // Thành công → cập nhật lại giỏ hàng
-                    showCart();
-                })
-                .catch(error => {
-                    console.error("Lỗi:", error);
-                    alert("Không thể xóa sản phẩm!");
-                });
-            }
-
-                     function confirmClearCart() {
-            fetch("/Order/ClearCart")
-                .then(res => res.text())
-                .then(html => {
-                    // Đổ HTML vào 'modalBody' thay vì 'modalCart'
-                    document.getElementById("modalBody").innerHTML = html;
-
-                    // Gọi Bootstrap mở modal lên
-                    var modalEl = document.getElementById("modalCart");
-                    var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                    modal.show();
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Không thể mở cửa sổ xác nhận!");
-                });
+        function editCartItem(productID) {
+            $.get("/Order/EditCartItem", { productId: productID }, function (html) {
+                // Nạp HTML vào .modal-content của dialogModal (layout dùng chung)
+                $("#dialogModal .modal-content").html(html);
+                var myModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('dialogModal'));
+                myModal.show();
+            });
         }
+
+        function deleteCartItem(productID) {
+            if(confirm("Xóa mặt hàng này khỏi giỏ?")) {
+                $.post("/Order/DeleteCartItem", { productID: productID }, function (result) {
+                    if (result.code === 1) showCart();
+                });
+            }
+        }
+
+        function confirmClearCart() {
+            $.get("/Order/ClearCart", function (html) {
+                // Nạp vào modal-content và hiển thị
+                $("#dialogModal .modal-content").html(html);
+                var myModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('dialogModal'));
+                myModal.show();
+            }).fail(function() {
+                alert("Không thể tải xác nhận xóa.");
+            });
+        }
+
         function clearCart() {
-            fetch("/Order/ClearCart", { method: "POST" })
-                .then(res => res.json())
-                .then(result => {
-                    if (result.code === 1) {
-                        // Đóng modal đang hiển thị
-                        var modalEl = document.getElementById('modalCart');
-                        var modal = bootstrap.Modal.getInstance(modalEl);
-                        if (modal) modal.hide();
-
-                        // Reload lại phần danh sách mặt hàng (xử lý ngầm)
-                        showCart();
-                    } else {
-                        alert(result.message);
-                    }
-                });
-        }
-            function updateCartItem(event, form) {
-                event.preventDefault();
-
-                var formData = new FormData(form);
-
-                fetch("/Order/UpdateCartItem", {
-                    method: "POST",
-                    body: formData
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error("Lỗi mạng");
-                    return response.json();
-                })
-                .then(result => {
-                    if (result.code === 0) {
-                        alert(result.message);
-                    } else {
-                        // Đóng modal Bootstrap đúng cách
-                        var modalEl = document.getElementById("dialogModal");
-                        var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                        modal.hide();
-
-                        // Reload giỏ hàng
-                        showCart();
-                    }
-                })
-                .catch(error => {
-                    console.error("Lỗi:", error);
-                    alert("Có lỗi xảy ra!");
-                });
-            }
-
-            function createOrder(event, form) {
-                // Ngăn submit mặc định
-                event.preventDefault();
-
-                // Lấy dữ liệu từ form
-                var formData = new FormData(form);
-
-                // Gửi POST lên API
-                fetch("/Order/CreateOrder", {
-                    method: "POST",
-                    body: formData
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error("Lỗi mạng");
-                    return response.json();
-                })
-                .then(result => {
-                    if (result.code === 0) {
-                        // Hiển thị lỗi
-                        alert(result.message);
-                    } else {
-                        // Thành công → chuyển hướng
-                        window.location.href = "/Order/Detail/" + result.code;
-                    }
-                })
-                .catch(error => {
-                    console.error("Lỗi:", error);
-                    alert("Có lỗi xảy ra!");
-                });
-            }
-    //  THÊM MỚI 
-    let customerList = [];
-    let cartCount = 0;
-
-    function searchCustomers() {
-        const q = document.getElementById("customerSearch").value;
-
-        fetch("/Order/GetCustomers?searchValue=" + encodeURIComponent(q))
-            .then(res => res.json())
-            .then(data => {
-                customerList = data;
-
-                const sel = document.getElementById("customerSelect");
-                sel.innerHTML = "";
-
-                if (!data.length) {
-                    // ✅ sửa lỗi string tại đây
-                    sel.innerHTML = "<option disabled>Không tìm thấy khách hàng</option>";
-                    sel.style.display = "block";
-                    return;
+            $.post("/Order/ClearCart", function (result) {
+                if (result.code === 1) {
+                    var myModal = bootstrap.Modal.getInstance(document.getElementById('dialogModal'));
+                    if (myModal) myModal.hide();
+                    showCart();
                 }
-
-                data.forEach(c => {
-                    const opt = document.createElement("option");
-                    opt.value = c.id;
-                    opt.text = c.name + (c.phone ? " - " + c.phone : "");
-                    sel.appendChild(opt);
-                });
-
-                sel.style.display = "block";
-            })
-            .catch(err => {
-                console.error(err);
-                alert("Lỗi tìm khách hàng!");
             });
-    }
+        }
 
+        function updateCartItem(event, form) {
+            event.preventDefault();
+            $.post("/Order/UpdateCartItem", $(form).serialize(), function (result) {
+                if (result.code === 1) {
+                    var myModal = bootstrap.Modal.getInstance(document.getElementById('dialogModal'));
+                    if (myModal) myModal.hide();
+                    showCart();
+                } else alert(result.message);
+            });
+        }
+
+        // --- PHẦN KHÁCH HÀNG & ĐƠN HÀNG ---
+
+        function createOrder(form) {
+            var customerID = $("#customerIDHidden").val();
+            if (customerID == "0") {
+                alert("Vui lòng chọn khách hàng trước khi lập đơn.");
+                return;
+            }
+            $.post("/Order/CreateOrder", $(form).serialize(), function (result) {
+                if (result.code === 1) window.location.href = "/Order";
+                else alert(result.message);
+            });
+        }
+
+        function searchCustomers() {
+            var keyword = $("#customerSearch").val();
+            if (keyword.length < 2) {
+                alert("Vui lòng nhập ít nhất 2 ký tự để tìm.");
+                return;
+            }
+            $.getJSON("/Order/GetCustomers", { searchValue: keyword }, function (data) {
+                var select = $("#customerSelect");
+                select.empty().show();
+                if (data.length === 0) {
+                    select.append("<option disabled>Không tìm thấy khách hàng</option>");
+                } else {
+                    customerList = data;
+                    $.each(data, function (i, c) {
+                        select.append($('<option>', { value: c.id, text: c.name + " - " + (c.phone || "") }));
+                    });
+                }
+            });
+        }
+
+        var customerList = [];
+
+        function selectCustomer() {
+            var selectedId = $(this).val();
+            var customer = customerList.find(x => x.id == selectedId);
+            if (customer) {
+                $("#customerIDHidden").val(customer.id);
+                $("#customerInfo").html("Đã chọn: <b>" + customer.name + "</b>");
+                $("#deliveryAddress").val(customer.address || "");
+                $("#deliveryProvince").val(customer.province || "");
+                $("#customerSelect").hide();
+                $("#customerSearch").val(customer.name);
+            }
+        }
     </script>
-
-    <div class="modal fade" id="modalCart" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" id="modalBody">
-        </div>
-    </div>
-
 }

@@ -2,6 +2,8 @@ wwwroot\css\site.css
 wwwroot\favicon.ico
 wwwroot\images\employees\c4b35a86-210f-4a9e-aef1-e8b2425de190.jpg
 wwwroot\images\employees\nophoto.png
+wwwroot\images\products\639112573945136716_vayhong.png
+wwwroot\images\products\639112593393267500_vayhong.png
 wwwroot\images\products\Ap1.webp
 wwwroot\images\products\Apip.webp
 wwwroot\images\products\Apple.webp
