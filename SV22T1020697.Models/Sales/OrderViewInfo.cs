@@ -39,5 +39,9 @@
         /// Điện thoại người giao hàng
         /// </summary>
         public string ShipperPhone { get; set; } = "";
+        public decimal TotalAmount { get; set; }
+        public string StatusDescription { get; set; } = "";
+
+        
     }
 }

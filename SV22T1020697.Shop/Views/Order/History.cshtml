@@ -1,8 +1,7 @@
 ﻿@using SV22T1020697.Models.Sales
-@* Lưu ý: Thêm namespace chứa Enum và hàm GetDescription dưới đây *@
 @using SV22T1020697.BusinessLayers
 @model IEnumerable<SV22T1020697.Models.Sales.OrderItemModel>
-
+@Html.AntiForgeryToken()
 @{
     ViewData["Title"] = "Lịch sử đơn hàng";
     var orders = Model ?? Enumerable.Empty<OrderItemModel>();
@@ -223,51 +222,40 @@
 
 @section Scripts {
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Lấy CSRF token từ form (nếu có)
-            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        $(document).ready(function () {
+            $(".btn-cancel").click(function (e) {
+                e.preventDefault();
+                var id = $(this).data("id"); // Lấy ID từ data-id
+                var btn = $(this);
 
-            document.querySelectorAll(".btn-cancel").forEach(btn => {
-                btn.addEventListener("click", function () {
-                    const id = this.dataset.id;
+                // HIỂN THỊ THÔNG BÁO XÁC NHẬN
+                if (!confirm("Bạn có chắc chắn muốn hủy đơn hàng #" + id + "?")) {
+                    return; // Nếu chọn Cancel thì dừng lại
+                }
 
-                    if (!confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) return;
+                // Nếu xác nhận OK, tiến hành gửi lệnh xóa
+                btn.prop("disabled", true).text("...");
 
-                    const originalText = this.innerText;
-                    this.disabled = true;
-                    this.innerText = "...";
-
-                    fetch('/Order/Cancel', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-form-urlencoded',
-                            'RequestVerificationToken': token
-                        },
-                        body: 'id=' + id
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            const row = document.getElementById("order-" + id);
-                            // Cập nhật giao diện trạng thái ngay lập tức
-                            const statusCell = row.querySelector(".text-center");
-                            statusCell.innerHTML = '<span class="status-pill status-cancel">Đã hủy</span>';
-
-                            // Xóa các nút thao tác không cần thiết
-                            const actionDiv = row.querySelector(".d-flex.justify-content-end");
-                            actionDiv.querySelectorAll(".btn-edit-small, .btn-cancel-small").forEach(el => el.remove());
+                $.ajax({
+                    url: '/Order/Cancel/' + id,
+                    type: 'POST',
+                    data: {
+                        // Gửi kèm "chìa khóa" bảo mật để Server cho phép thực hiện
+                        "__RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (res) {
+                        if (res.success) {
+                            alert(res.message);
+                            location.reload(); // Tải lại trang để cập nhật trạng thái mới
                         } else {
-                            alert(data.message || "Không thể hủy đơn hàng.");
-                            this.disabled = false;
-                            this.innerText = originalText;
+                            alert(res.message);
+                            btn.prop("disabled", false).text("HỦY");
                         }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        alert("Lỗi kết nối hệ thống.");
-                        this.disabled = false;
-                        this.innerText = originalText;
-                    });
+                    },
+                    error: function () {
+                        alert("Lỗi kết nối máy chủ!");
+                        btn.prop("disabled", false).text("HỦY");
+                    }
                 });
             });
         });

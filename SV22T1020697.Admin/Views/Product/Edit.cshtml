@@ -1,10 +1,9 @@
-﻿@using SV22T1020697.Models.Catalog
-@model Product
+﻿@model SV22T1020697.Models.Catalog.Product
 @{
 }
 @section PageToolBar {
     <button type="submit" form="formEdit" class="btn btn-primary">
-        <i class="bi bi-save"></i>
+        <i class="bi bi-save me-1"></i>
         Lưu dữ liệu
     </button>
 
@@ -35,8 +34,7 @@
                             <input type="text" asp-for="ProductName"
                                    class="form-control"
                                    placeholder="" autofocus />
-                            <span asp-validation-for="ProductName"
-                                  class="text-danger"></span>
+                            <span asp-validation-for="ProductName" class="text-danger"></span>
                         </div>
                     </div>
 
@@ -45,36 +43,27 @@
                         <div class="col-sm-3">
                             <select class="form-select" asp-for="CategoryID" asp-items="ViewBag.Categories">
                             </select>
-                            <span asp-validation-for="CategoryID"
-                                  class="text-danger"></span>
-
+                            <span asp-validation-for="CategoryID" class="text-danger"></span>
                         </div>
 
                         <label class="col-sm-2 col-form-label text-end">Nhà cung cấp</label>
                         <div class="col-sm-4">
                             <select class="form-select" asp-for="SupplierID" asp-items="ViewBag.Suppliers">
                             </select>
-                            <span asp-validation-for="SupplierID"
-                                  class="text-danger"></span>
+                            <span asp-validation-for="SupplierID" class="text-danger"></span>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Đơn vị tính</label>
                         <div class="col-sm-3">
-                            <input type="text" asp-for="Unit"
-                                   class="form-control "
-                                   placeholder="" />
+                            <input type="text" asp-for="Unit" class="form-control" placeholder="" />
                             <span asp-validation-for="Unit" class="text-danger"></span>
-
                         </div>
 
                         <label class="col-sm-2 col-form-label text-end">Giá</label>
                         <div class="col-sm-4">
-                            <input type="text" asp-for="Price"
-                                   class="form-control money-input"
-                                   placeholder="Giá bán"
-                                   min="0" />
+                            <input type="text" asp-for="Price" class="form-control money-input" placeholder="Giá bán" />
                         </div>
                     </div>
 
@@ -82,13 +71,8 @@
                         <label class="col-sm-3 col-form-label">Trạng thái</label>
                         <div class="col-sm-9">
                             <div class="form-check form-switch mt-2">
-                                <input class="form-check-input" asp-for="IsSelling"
-                                       type="checkbox"
-                                       id="IsSelling"
-                                       checked />
-                                <label class="form-check-label" for="IsSelling">
-                                    Đang bán
-                                </label>
+                                <input class="form-check-input" asp-for="IsSelling" type="checkbox" id="IsSelling" />
+                                <label class="form-check-label" for="IsSelling">Đang bán</label>
                             </div>
                         </div>
                     </div>
@@ -96,16 +80,20 @@
                     <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Ảnh</label>
                         <div class="col-sm-9">
-                            <input type="file"
-                                   class="form-control"
-                                   accept="image/*"
-                                   data-img-preview="imgPreview"
-                                   onchange="previewImage(this)" />
-                            <div class="mt-2">
-                                <img id="imgPreview"
-                                     src="~/images/products/@(string.IsNullOrEmpty(Model.Photo) ? "nophoto.png" : Model.Photo)"
-                                     class="img-thumbnail"
-                                     style="max-height: 160px;" />
+                            <input type="file" name="uploadPhoto" class="form-control" accept="image/*"
+                                   onchange="document.getElementById('imgPreview').src = window.URL.createObjectURL(this.files[0])" />
+
+                            <div class="mt-2 text-center text-sm-start">
+                                @{
+                                    string imagePath = "/images/products/nophoto.png";
+                                    if (!string.IsNullOrEmpty(Model.Photo))
+                                    {
+                                        imagePath = Model.Photo.StartsWith("products/") ? $"/images/{Model.Photo}" : $"/images/products/{Model.Photo}";
+                                    }
+                                }
+                                <img id="imgPreview" src="@imagePath"
+                                     onerror="this.src='/images/products/nophoto.png'"
+                                     class="img-thumbnail shadow-sm" style="max-height: 160px; width: auto;" />
                             </div>
                         </div>
                     </div>
@@ -113,21 +101,22 @@
                     <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Mô tả</label>
                         <div class="col-sm-9">
-                            <textarea class="form-control" asp-for="ProductDescription"
-                                      rows="3"
-                                      placeholder="Nhập mô tả mặt hàng"></textarea>
+                            <textarea class="form-control" asp-for="ProductDescription" rows="3" placeholder="Nhập mô tả mặt hàng"></textarea>
                         </div>
                     </div>
-
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-@{
-    //if (Model.ProductId > 0) {
-    await Html.RenderPartialAsync("ListPhotos");
-    await Html.RenderPartialAsync("ListAttributes");
-    // }
+@* ĐÃ SỬA LỖI void to object TẠI ĐÂY *@
+@if (Model.ProductID > 0)
+{
+    <div class="mb-5">
+        @{
+            await Html.RenderPartialAsync("ListPhotos", Model);
+            await Html.RenderPartialAsync("ListAttributes", Model);
+        }
+    </div>
 }

@@ -1,0 +1,130 @@
+﻿@model SV22T1020697.Models.HR.Employee
+@{
+    ViewData["Title"] = "Đăng ký";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] ?? "Đăng ký") – Admin</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="bg-light">
+    <main class="container py-5" style="min-height: 100vh;">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow border-0">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-4">
+                            <i class="bi bi-person-plus text-success" style="font-size:3rem"></i>
+                            <h4 class="fw-bold mt-2 mb-1">Tạo tài khoản Admin</h4>
+                            <p class="text-muted small mb-0">Đăng ký nhân viên để truy cập trang quản trị</p>
+                        </div>
+
+                        <form method="post" asp-controller="Account" asp-action="Register" novalidate>
+                            @Html.AntiForgeryToken()
+
+                            <div asp-validation-summary="All" class="alert alert-danger py-2 small"
+                                 style="display:@(ViewData.ModelState.ErrorCount > 0 ? "block" : "none")"></div>
+
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Họ và tên <span class="text-danger">*</span></label>
+                                    <input asp-for="FullName" class="form-control" maxlength="100" required autofocus />
+                                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Ngày sinh</label>
+                                    <input asp-for="BirthDate" type="date" class="form-control" />
+                                    <span asp-validation-for="BirthDate" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Số điện thoại</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                                        <input asp-for="Phone" class="form-control" maxlength="20" placeholder="0912345678" />
+                                    </div>
+                                    <span asp-validation-for="Phone" class="text-danger small"></span>
+                                    @Html.ValidationMessage("Phone", new { @class = "text-danger small" })
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                        <input asp-for="Email" type="email" class="form-control" maxlength="150"
+                                               placeholder="example@email.com" required autocomplete="email" />
+                                    </div>
+                                    <span asp-validation-for="Email" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Địa chỉ</label>
+                                    <input asp-for="Address" class="form-control" maxlength="200"
+                                           placeholder="Số nhà, tên đường, phường/xã..." />
+                                    <span asp-validation-for="Address" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Mật khẩu <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input name="password" type="password" id="pwd1" class="form-control"
+                                               placeholder="Tối thiểu 6 ký tự" minlength="6" required autocomplete="new-password" />
+                                        <button class="btn btn-outline-secondary" type="button"
+                                                onclick="togglePwd('pwd1',this)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                    @Html.ValidationMessage("Password", new { @class = "text-danger small" })
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input name="confirmPassword" type="password" id="pwd2" class="form-control"
+                                               placeholder="Nhập lại mật khẩu" required autocomplete="new-password" />
+                                        <button class="btn btn-outline-secondary" type="button"
+                                                onclick="togglePwd('pwd2',this)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                    @Html.ValidationMessage("ConfirmPassword", new { @class = "text-danger small" })
+                                </div>
+                            </div>
+
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-success btn-lg fw-bold">
+                                    <i class="bi bi-person-check me-2"></i>Đăng ký
+                                </button>
+                            </div>
+
+                            <div class="text-center mt-3">
+                                <span class="text-muted small">Đã có tài khoản?</span>
+                                <a asp-controller="Account" asp-action="Login" class="fw-semibold ms-1">Đăng nhập</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePwd(inputId, btn) {
+            const inp = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+            icon.className = inp.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+        }
+    </script>
+</body>
+</html>
+

@@ -6,99 +6,105 @@
 <div class="row">
     <!-- Tìm kiếm & chọn mặt hàng -->
     <div class="col-4">
-        <div class="card card-outline card-primary h-100">
+        <div class="card card-outline card-primary" style="min-height:500px">
             <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="bi bi-search"></i>
-                    Lựa chọn hàng cần bán
-                </h5>
+                <h6 class="mb-0"><i class="bi bi-search me-1"></i>Chọn mặt hàng cần bán</h6>
             </div>
-
-            <div class="card-body">
+            <div class="card-body pb-1">
                 <!-- Search -->
-                <form id="formSearch" class="mb-3"
-                      method="get"
-                      action="~/Order/SearchProduct"
+                <form id="formSearch" method="get" action="/Order/SearchProduct"
                       data-target="searchResult"
                       onsubmit="paginationSearch(event,this,1)">
-
                     <input type="hidden" asp-for="PageSize" />
                     <div class="input-group">
-                        <input class="form-control"
-                               asp-for="SearchValue"
-                               placeholder="Nhập tên mặt hàng cần tìm" autofocus />
-                        <button class="btn btn-primary">
+                        <input class="form-control" asp-for="SearchValue"
+                               placeholder="Nhập tên mặt hàng..." autofocus />
+                        <button class="btn btn-primary" type="submit">
                             <i class="bi bi-search"></i>
                         </button>
                     </div>
                 </form>
             </div>
-
             <!-- Danh sách mặt hàng -->
-
-            <div id="searchResult"></div>
-
-
-
+            <div id="searchResult" class="p-2 overflow-auto" style="max-height:520px"></div>
         </div>
     </div>
+           
+
+           
 
     <!-- Giỏ hàng và thông tin khách hàng -->
     <div class="col-8">
         <!-- Giỏ hàng -->
-        <div class="row">
-            <div class="col-12" id="cart">
+        <div id="cart" class="mb-3"></div>
+
+        <!-- Form lập đơn -->
+        <div class="card card-outline card-info">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-person me-1"></i>Thông tin khách hàng &amp; giao hàng</h6>
             </div>
-        </div>
-        <!-- Thông tin khách hàng và nơi giao hàng -->
-        <div class="row mt-3">
-            <div class="col-12">
-                <div class="card card-outline card-info">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="bi bi-person"></i>
-                            Thông tin khách hàng & nơi giao hàng
-                        </h5>
-                    </div>
+            <div class="card-body">
+                <form onsubmit="createOrder(event,this)">
 
-                    <div class="card-body">
-                        <form onsubmit="createOrder(event, this)">
-                            <div class="row mb-3">
-                                <label class="col-md-2 col-form-label">Khách hàng</label>
-                                <div class="col-md-10">
-                                    <select class="form-select" name="customerID">
-                                        <option>-- Chọn khách hàng --</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <label class="col-md-2 col-form-label">Tỉnh/thành</label>
-                                <div class="col-md-10">
-                                    <select class="form-select"
-                                            name="province"
-                                            asp-items="await SelectListHelper.ProvincesAsync()">
-                                        <option>-- Chọn Tỉnh/thành giao hàng --</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <label class="col-md-2 col-form-label">Địa chỉ</label>
-                                <div class="col-md-10">
-                                    <textarea class="form-control" name="address"></textarea>
-                                </div>
-                            </div>
-
-                            <div class="text-end">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-check-circle"></i>
-                                    Lập đơn hàng
+                    <!-- Tìm khách hàng -->
+                    <div class="row mb-3">
+                        <label class="col-md-3 col-form-label fw-semibold">
+                            Khách hàng <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-md-9">
+                            <div class="input-group">
+                                <input type="text" id="customerSearch" class="form-control"
+                                       placeholder="Nhập tên để tìm khách hàng..." autocomplete="off" />
+                                <button type="button" class="btn btn-outline-secondary"
+                                        onclick="searchCustomers()">
+                                    <i class="bi bi-search"></i>
                                 </button>
                             </div>
-                        </form>
+                            <select id="customerSelect" class="form-select mt-1"
+                                    size="4" style="display:none">
+                            </select>
+                            <input type="hidden" id="customerIDHidden" name="customerID" value="0" />
+                            <div id="customerInfo" class="mt-1 small text-success"></div>
+                            <span id="customerValidationMessage" class="text-danger small d-block mt-1"></span>
+                            <div id="orderCreateMessage" class="mt-2"></div>
+                        </div>
                     </div>
-                </div>
+                    <!-- Tỉnh/Thành -->
+                    <div class="row mb-3">
+                        <label class="col-md-3 col-form-label fw-semibold">
+                            Tỉnh/Thành <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-md-9">
+                            <select class="form-select" name="deliveryProvince" id="deliveryProvince">
+                                <option value="">-- Chọn tỉnh/thành --</option>
+                                @foreach (var p in await SelectListHelper.ProvincesAsync())
+                                {
+                                    if (p.Value != "")
+                                    {
+                                        <option value="@p.Value">@p.Text</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Địa chỉ -->
+                    <div class="row mb-3">
+                        <label class="col-md-3 col-form-label fw-semibold">
+                            Địa chỉ <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-md-9">
+                            <textarea class="form-control" name="deliveryAddress" id="deliveryAddress"
+                                      rows="2" placeholder="Số nhà, tên đường, phường/xã..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="text-end">
+                        <button class="btn btn-success btn-lg">
+                            <i class="bi bi-check-circle me-1"></i>Lập đơn hàng
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -171,8 +177,8 @@
                     return response.json(); // nếu API trả JSON
                 })
                 .then(result => {
-                    // Nếu API có code/message thì bạn có thể xử lý thêm
-                    // Ví dụ:
+                    
+                    
                     if (result.code === 0) {
                         alert(result.message);
                         return;
@@ -187,31 +193,40 @@
                 });
             }
 
-            function clearCart() {
-                fetch("/Order/ClearCart", {
-                    method: "POST"
+                     function confirmClearCart() {
+            fetch("/Order/ClearCart")
+                .then(res => res.text())
+                .then(html => {
+                    // Đổ HTML vào 'modalBody' thay vì 'modalCart'
+                    document.getElementById("modalBody").innerHTML = html;
+
+                    // Gọi Bootstrap mở modal lên
+                    var modalEl = document.getElementById("modalCart");
+                    var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modal.show();
                 })
-                .then(response => {
-                    if (!response.ok) throw new Error("Lỗi mạng");
-                    return response.json(); // nếu API trả JSON
-                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Không thể mở cửa sổ xác nhận!");
+                });
+        }
+        function clearCart() {
+            fetch("/Order/ClearCart", { method: "POST" })
+                .then(res => res.json())
                 .then(result => {
-                    // Nếu API có code/message thì bạn có thể xử lý thêm
-                    // Ví dụ:
-                    if (result.code === 0) {
+                    if (result.code === 1) {
+                        // Đóng modal đang hiển thị
+                        var modalEl = document.getElementById('modalCart');
+                        var modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) modal.hide();
+
+                        // Reload lại phần danh sách mặt hàng (xử lý ngầm)
+                        showCart();
+                    } else {
                         alert(result.message);
-                        return;
                     }
-
-                    // Thành công → cập nhật lại giỏ hàng
-                    showCart();
-                })
-                .catch(error => {
-                    console.error("Lỗi:", error);
-                    alert("Không thể xóa sản phẩm!");
                 });
-            }
-
+        }
             function updateCartItem(event, form) {
                 event.preventDefault();
 
@@ -229,7 +244,7 @@
                     if (result.code === 0) {
                         alert(result.message);
                     } else {
-                        // 🔥 Đóng modal Bootstrap đúng cách
+                        // Đóng modal Bootstrap đúng cách
                         var modalEl = document.getElementById("dialogModal");
                         var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
                         modal.hide();
@@ -274,5 +289,48 @@
                     alert("Có lỗi xảy ra!");
                 });
             }
+    //  THÊM MỚI 
+    let customerList = [];
+    let cartCount = 0;
+
+    function searchCustomers() {
+        const q = document.getElementById("customerSearch").value;
+
+        fetch("/Order/GetCustomers?searchValue=" + encodeURIComponent(q))
+            .then(res => res.json())
+            .then(data => {
+                customerList = data;
+
+                const sel = document.getElementById("customerSelect");
+                sel.innerHTML = "";
+
+                if (!data.length) {
+                    // ✅ sửa lỗi string tại đây
+                    sel.innerHTML = "<option disabled>Không tìm thấy khách hàng</option>";
+                    sel.style.display = "block";
+                    return;
+                }
+
+                data.forEach(c => {
+                    const opt = document.createElement("option");
+                    opt.value = c.id;
+                    opt.text = c.name + (c.phone ? " - " + c.phone : "");
+                    sel.appendChild(opt);
+                });
+
+                sel.style.display = "block";
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Lỗi tìm khách hàng!");
+            });
+    }
+
     </script>
+
+    <div class="modal fade" id="modalCart" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" id="modalBody">
+        </div>
+    </div>
+
 }

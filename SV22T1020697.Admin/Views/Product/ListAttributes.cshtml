@@ -1,5 +1,8 @@
-﻿@{
+﻿@model SV22T1020697.Models.Catalog.Product
+@{
     Layout = null;
+    // Ép kiểu danh sách thuộc tính từ ViewBag
+    var attributes = ViewBag.Attributes as IEnumerable<SV22T1020697.Models.Catalog.ProductAttribute>;
 }
 <div class="row justify-content-center">
     <div class="col-12">
@@ -13,7 +16,8 @@
                         </h6>
                     </div>
                     <div class="col text-end">
-                        <a class="btn btn-sm btn-primary" href="~/Product/CreateAttribute/123">
+                        @* Sử dụng Model.ProductID để truyền ID sản phẩm cha *@
+                        <a class="btn btn-sm btn-primary" href="~/Product/CreateAttribute/@Model.ProductID">
                             <i class="bi bi-plus"></i>
                             Thêm thuộc tính
                         </a>
@@ -32,19 +36,31 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @for (int i = 1; i <= 10; i++)
+                        @if (attributes != null && attributes.Any())
+                        {
+                            foreach (var item in attributes)
+                            {
+                                <tr>
+                                    <td class="align-middle"><strong>@item.AttributeName</strong></td>
+                                    <td class="align-middle">@item.AttributeValue</td>
+                                    <td class="text-center align-middle">@item.DisplayOrder</td>
+                                    <td class="text-center text-nowrap align-middle">
+                                        @* Link sửa và xóa kèm theo attributeId *@
+                                        <a class="btn btn-sm btn-primary" href="~/Product/EditAttribute/@item.ProductID?attributeId=@item.AttributeID">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a class="btn btn-sm btn-danger" href="~/Product/DeleteAttribute/@item.ProductID?attributeId=@item.AttributeID">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td>Màu sắc</td>
-                                <td>Đỏ</td>
-                                <td class="text-center">@i</td>
-                                <td class="text-center text-nowrap">
-                                    <a class="btn btn-sm btn-primary" href="~/Product/EditAttribute/123?attributeId=456">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <a class="btn btn-sm btn-danger" href="~/Product/DeleteAttribute/123?attributeId=456">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
+                                <td colspan="4" class="text-center text-muted">
+                                    Sản phẩm này chưa có thuộc tính nào.
                                 </td>
                             </tr>
                         }

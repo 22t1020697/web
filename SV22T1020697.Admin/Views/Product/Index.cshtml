@@ -1,5 +1,4 @@
-﻿@using SV22T1020697.Models.Catalog
-@model ProductSearchInput
+﻿@model ProductSearchInput
 @{
     ViewBag.Title = "Quản lý Mặt hàng";
 }
@@ -22,31 +21,20 @@
             <input type="hidden" asp-for="PageSize" />
 
             <div class="row g-2">
-                <!-- Category -->
                 <div class="col-md-3">
                     <label class="form-label">Loại hàng</label>
-                    <select class="form-select" asp-for="CategoryID">
-                        <option value="">-- Tất cả --</option>
-                        @foreach (var c in ViewBag.Categories)
-                        {
-                            <option value="@c.CategoryID">@c.CategoryName</option>
-                        }
+                    <select class="form-select" asp-for="CategoryID" asp-items="ViewBag.Categories">
+                        @* Thẻ -- Tất cả -- thường đã được thêm trong SelectListHelper *@
                     </select>
                 </div>
 
-                <!-- Supplier -->
                 <div class="col-md-3">
                     <label class="form-label">Nhà cung cấp</label>
-                    <select class="form-select" asp-for="SupplierID">
-                        <option value="">-- Tất cả --</option>
-                        @foreach (var s in ViewBag.Suppliers)
-                        {
-                            <option value="@s.SupplierID">@s.SupplierName</option>
-                        }
+                    <select class="form-select" asp-for="SupplierID" asp-items="ViewBag.Suppliers">
+                        @* Thẻ -- Tất cả -- thường đã được thêm trong SelectListHelper *@
                     </select>
                 </div>
 
-                <!-- Price -->
                 <div class="col-md-3">
                     <label class="form-label">Khoảng giá</label>
                     <div class="input-group">
@@ -56,14 +44,13 @@
                     </div>
                 </div>
 
-                <!-- Search -->
                 <div class="col-md-3">
                     <label class="form-label">Tên mặt hàng</label>
                     <div class="input-group">
                         <input asp-for="SearchValue"
                                class="form-control"
                                placeholder="Tên mặt hàng..." />
-                        <button class="btn btn-info">
+                        <button type="submit" class="btn btn-info">
                             <i class="bi bi-search"></i>
                         </button>
                     </div>
@@ -78,6 +65,7 @@
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // Thực hiện tìm kiếm ngay khi trang web vừa tải xong
             paginationSearch(null, document.getElementById("formSearch"), @Model.Page);
         });
     </script>

@@ -1,4 +1,5 @@
 ﻿using SV22T1020697.BusinessLayers;
+using SV22T1020697.DataLayers;
 using SV22T1020697.DataLayers.Interfaces;
 using SV22T1020697.DataLayers.SQLServer;
 using SV22T1020697.Models.Common;
@@ -14,13 +15,15 @@ namespace SV22T1020697.BusinessLayers
     public static class SalesDataService
     {
         private static readonly IOrderRepository orderDB;
-
+        private static readonly ICartRepository cartDB;
         /// <summary>
         /// Constructor
         /// </summary>
         static SalesDataService()
         {
-            orderDB = new OrderRepository(Configuration.ConnectionString);
+            string connectionString = Configuration.ConnectionString;
+            orderDB = new OrderRepository(connectionString);
+            cartDB = new CartRepository(connectionString);
         }
 
         #region Order
@@ -204,7 +207,7 @@ namespace SV22T1020697.BusinessLayers
         /// </summary>
         public static async Task<OrderDetailViewInfo?> GetDetailAsync(int orderID, int productID)
         {
-            return await orderDB.GetDetail(orderID, productID);
+            return await orderDB.GetDetailAsync(orderID, productID);
         }
 
         /// <summary>
@@ -235,5 +238,23 @@ namespace SV22T1020697.BusinessLayers
         }
 
         #endregion
+
+        /// <summary>
+        /// Lấy danh sách giỏ hàng từ Database của khách hàng
+        /// </summary>
+        public static List<CartItem> ListCartItems(int customerID)
+        {
+            return cartDB.GetCartItems(customerID).ToList();
+        }
+
+        /// <summary>
+        /// Đồng bộ giỏ hàng từ Session xuống Database
+        /// </summary>
+        public static bool SyncCart(int customerID, IEnumerable<CartItem> cartItems)
+        {
+            return cartDB.SyncCart(customerID, cartItems);
+        }
+
+      
     }
 }

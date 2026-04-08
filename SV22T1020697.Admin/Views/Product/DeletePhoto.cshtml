@@ -1,83 +1,100 @@
-﻿@{
+﻿@model SV22T1020697.Models.Catalog.ProductPhoto
+@{
     ViewBag.Title = "Xóa hình ảnh sản phẩm";
+}
 
-    // ===== DỮ LIỆU MẪU (DEMO) =====
-    int productId = 1;
-    int photoId = 101;
-
-    var photo = new
-    {
-        PhotoID = photoId,
-        ImageUrl = "/images/products/sample.jpg",
-        Description = "Hình mặt trước sản phẩm"
-    };
-
-    var product = new
-    {
-        ProductID = productId,
-        ProductName = "Sữa tươi Vinamilk"
-    };
+@section PageToolBar {
+    <button type="submit" form="formDelete" class="btn btn-danger">
+        <i class="bi bi-trash me-1"></i> Xác nhận xóa
+    </button>
+    <a href="~/Product/Edit/@Model.ProductID#photos" class="btn btn-secondary ms-1">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
 }
 
 <div class="row justify-content-center">
     <div class="col-md-6">
+        <div class="card card-danger card-outline shadow-sm">
 
-        <div class="card card-danger card-outline">
-
-            <!-- ===== HEADER ===== -->
             <div class="card-header">
-                <h3 class="card-title text-danger">
-                    <i class="bi bi-trash me-2"></i>
-                    Xóa hình ảnh sản phẩm
+                <h3 class="card-title text-danger mb-0">
+                    <i class="bi bi-trash-fill me-2"></i>
+                    Xác nhận xóa hình ảnh
                 </h3>
             </div>
 
-            <!-- ===== BODY ===== -->
             <div class="card-body">
-                <form method="post">
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show mb-3">
+                        <i class="bi bi-exclamation-triangle me-1"></i> @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
 
-                    <input type="hidden" name="ProductID" value="@product.ProductID" />
-                    <input type="hidden" name="PhotoID" value="@photo.PhotoID" />
+                <form id="formDelete" action="~/Product/DeletePhoto" method="post">
+                    @* Truyền tham số ẩn để Controller nhận diện đúng bản ghi cần xóa *@
+                    <input type="hidden" name="productId" value="@Model.ProductID" />
+                    <input type="hidden" name="photoId" value="@Model.PhotoID" />
 
                     <div class="alert alert-warning">
-                        Bạn có chắc chắn muốn <strong>xóa hình ảnh</strong> của sản phẩm:
-                        <strong>@product.ProductName</strong>?
+                        <i class="bi bi-exclamation-circle-fill me-2"></i>
+                        Bạn có chắc chắn muốn <strong>xóa hình ảnh</strong> này không?
+                        Hành động này không thể hoàn tác.
                     </div>
 
-                    <!-- Preview hình ảnh -->
-                    <div class="text-center mb-3">
-                        <img src="@photo.ImageUrl"
-                             class="img-thumbnail"
-                             style="max-height:200px"
+                    <div class="text-center mb-4 bg-light p-3 rounded border">
+                        <label class="d-block mb-2 text-muted small">Hình ảnh cần xóa:</label>
+                        @{
+                            // Logic xử lý đường dẫn ảnh đồng bộ toàn hệ thống
+                            string imagePath = "/images/products/nophoto.png";
+                            if (!string.IsNullOrEmpty(Model.Photo))
+                            {
+                                if (Model.Photo.StartsWith("products/", StringComparison.OrdinalIgnoreCase))
+                                    imagePath = $"/images/{Model.Photo}";
+                                else
+                                    imagePath = $"/images/products/{Model.Photo}";
+                            }
+                        }
+                        <img src="@imagePath"
+                             onerror="this.src='/images/products/nophoto.png'"
+                             class="img-thumbnail shadow-sm"
+                             style="max-height:220px; object-fit:cover;"
                              alt="Product photo" />
                     </div>
 
-                    <!-- Mô tả -->
                     <div class="mb-3">
-                        <label class="form-label">Mô tả</label>
-                        <input type="text"
-                               class="form-control"
-                               value="@photo.Description"
-                               readonly />
+                        <label class="form-label fw-bold">Mô tả ảnh</label>
+                        <p class="form-control bg-light">
+                            @(string.IsNullOrEmpty(Model.Description) ? "(Không có mô tả)" : Model.Description)
+                        </p>
                     </div>
 
-                    <!-- Buttons -->
-                    <div class="text-end">
-                        <button type="submit"
-                                class="btn btn-danger">
-                            <i class="bi bi-trash"></i> Xóa hình ảnh
-                        </button>
-
-                        <a href="~/Product/ListPhotos/@product.ProductID"
-                           class="btn btn-secondary ms-2">
-                            <i class="bi bi-x-circle"></i> Hủy
-                        </a>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label class="form-label fw-bold">Thứ tự hiển thị</label>
+                            <p class="form-control bg-light">@Model.DisplayOrder</p>
+                        </div>
+                        <div class="col-sm-6 text-center">
+                            <label class="form-label fw-bold d-block">Trạng thái</label>
+                            @if (!Model.IsHidden)
+                            {
+                                <span class="badge bg-success fs-6 mt-1">Đang hiển thị</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary fs-6 mt-1">Đang ẩn</span>
+                            }
+                        </div>
                     </div>
 
                 </form>
             </div>
-
         </div>
 
+        <p class="text-center mt-3 text-muted small">
+            <i class="bi bi-info-circle"></i>
+            Lưu ý: Chỉ xóa ảnh phụ này, thông tin mặt hàng chính sẽ không thay đổi.
+        </p>
     </div>
 </div>

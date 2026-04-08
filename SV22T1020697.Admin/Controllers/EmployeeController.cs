@@ -182,7 +182,7 @@ namespace SV22T1020697.Admin.Controllers
             var currentUser = User.GetUserData();
             if (currentUser == null) return RedirectToAction("Login", "Account");
 
-            // Thay dòng 185 hiện tại bằng dòng này:
+            
             if (!(currentUser.Roles?.Contains("admin") ?? false) && currentUser.UserId != EmployeeID.ToString()) return RedirectToAction("AccessDenied", "Account");
 
             bool result = await PartnerDataService.ChangeEmployeePasswordAsync(EmployeeID, OldPassword, NewPassword);

@@ -1,9 +1,10 @@
-﻿using SV22T1020697.DataLayers.Interfaces;
+﻿using SV22T1020697.BusinessLayers;
+using SV22T1020697.DataLayers.Interfaces;
+using SV22T1020697.DataLayers.SqlServer;
 using SV22T1020697.DataLayers.SQLServer;
 using SV22T1020697.Models.Catalog;
 using SV22T1020697.Models.Common;
-using SV22T1020697.BusinessLayers;
-using SV22T1020697.Datalayers.SqlServer;
+using SV22T1020697.Models.Partner;
 
 namespace SV22T1020697.BusinessLayers
 {
@@ -15,6 +16,7 @@ namespace SV22T1020697.BusinessLayers
     {
         private static readonly IProductRepository productDB;
         private static readonly IGenericRepository<Category> categoryDB;
+        private static readonly IGenericRepository<Supplier> supplierDB;
 
         /// <summary>
         /// Constructor
@@ -23,8 +25,18 @@ namespace SV22T1020697.BusinessLayers
         {
             categoryDB = new CategoryRepository(Configuration.ConnectionString);
             productDB = new ProductRepository(Configuration.ConnectionString);
+            supplierDB = new SupplierRepository(Configuration.ConnectionString);
         }
 
+
+
+        /// <summary>
+        /// Lấy thông tin chi tiết của một nhà cung cấp dựa vào mã.
+        /// </summary>
+        public static async Task<Supplier?> GetSupplierAsync(int supplierID)
+        {
+            return await supplierDB.GetAsync(supplierID);
+        }
         #region Category
 
         /// <summary>

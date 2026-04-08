@@ -1,21 +1,19 @@
-﻿using Dapper;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Data.SqlClient;
+using SV22T1020697.BusinessLayers;
 using SV22T1020697.Models.Catalog;
 using SV22T1020697.Models.Sales;
-using SV22T1020697.Shop; // Giả sử ShoppingCartHelper nằm trong namespace này
+using SV22T1020697.Models.Common;
+using SV22T1020697.Shop;
 
 namespace SV22T1020697.Shop.Controllers
 {
     public class OrderController : Controller
     {
-        private readonly string _connectionString;
-
-        public OrderController(IConfiguration configuration)
+        // Không còn cần IConfiguration và SqlConnection ở đây nữa, 
+        // BusinessLayer đã lo việc kết nối CSDL.
+        public OrderController()
         {
-            _connectionString = configuration.GetConnectionString("LiteCommerceDB")
-                                ?? throw new Exception("Chưa cấu hình chuỗi kết nối LiteCommerceDB!");
         }
 
         /// <summary>
@@ -25,31 +23,27 @@ namespace SV22T1020697.Shop.Controllers
         {
             var model = new List<CartItem>();
 
-            // 1. TRƯỜNG HỢP MUA NGAY (Từ nút Mua ngay ở trang chi tiết sản phẩm)
+            // 1. Mua ngay (ở trang chi tiết sản phẩm)
             if (productId.HasValue)
             {
-                using (var connection = new SqlConnection(_connectionString))
-                {
-                    var product = await connection.QueryFirstOrDefaultAsync<Product>(
-                        "SELECT * FROM Products WHERE ProductID = @id",
-                        new { id = productId });
+             
+                var product = await CatalogDataService.GetProductAsync(productId.Value);
 
-                    if (product != null)
+                if (product != null)
+                {
+                    model.Add(new CartItem
                     {
-                        model.Add(new CartItem
-                        {
-                            ProductID = product.ProductID,
-                            ProductName = product.ProductName ?? "Sản phẩm",
-                            Photo = string.IsNullOrEmpty(product.Photo) ? "nophoto.png" : product.Photo,
-                            Unit = product.Unit ?? "",
-                            Quantity = quantity,
-                            SalePrice = product.Price
-                        });
-                        ViewBag.SelectedIds = product.ProductID.ToString();
-                    }
+                        ProductID = product.ProductID,
+                        ProductName = product.ProductName ?? "Sản phẩm",
+                        Photo = string.IsNullOrEmpty(product.Photo) ? "nophoto.png" : product.Photo,
+                        Unit = product.Unit ?? "",
+                        Quantity = quantity,
+                        SalePrice = product.Price
+                    });
+                    ViewBag.SelectedIds = product.ProductID.ToString();
                 }
             }
-            // 2. TRƯỜNG HỢP TỪ GIỎ HÀNG (Lọc các sản phẩm được chọn)
+            // 2. Giỏ hàng (Lọc các sản phẩm được chọn)
             else if (!string.IsNullOrEmpty(selectedIds))
             {
                 var cart = ShoppingCartHelper.GetShoppingCart();
@@ -70,12 +64,9 @@ namespace SV22T1020697.Shop.Controllers
             int? customerId = HttpContext.Session.GetInt32("CustomerID");
             if (customerId.HasValue)
             {
-                using (var connection = new SqlConnection(_connectionString))
-                {
-                    string sqlCustomer = "SELECT * FROM Customers WHERE CustomerID = @id";
-                    var customer = await connection.QueryFirstOrDefaultAsync<dynamic>(sqlCustomer, new { id = customerId });
-                    ViewBag.Customer = customer;
-                }
+                // Gọi đúng Service và thêm 'await' vì đây là hàm Async
+                var customer = await PartnerDataService.GetCustomerAsync(customerId.Value);
+                ViewBag.Customer = customer;
             }
 
             ViewBag.ProvinceList = await SelectListHelper.Provinces() ?? new List<SelectListItem>();
@@ -95,10 +86,8 @@ namespace SV22T1020697.Shop.Controllers
             var allCart = ShoppingCartHelper.GetShoppingCart();
             var checkoutItems = allCart.Where(m => ids.Contains(m.ProductID)).ToList();
 
-            // Nếu đặt hàng từ giỏ nhưng không tìm thấy item trong session (hết hạn session)
             if (checkoutItems.Count == 0 && !selectedIds.Contains(","))
             {
-                // Đoạn này xử lý dự phòng cho trường hợp Mua Ngay không qua giỏ hàng
                 return RedirectToAction("Index", "Cart");
             }
 
@@ -115,53 +104,29 @@ namespace SV22T1020697.Shop.Controllers
                 int? customerId = HttpContext.Session.GetInt32("CustomerID");
                 if (!customerId.HasValue) return RedirectToAction("Login", "Customer");
 
-                using (var connection = new SqlConnection(_connectionString))
+                // 1. Lưu đơn hàng thông qua BusinessLayer
+                int orderId = await SalesDataService.AddOrderAsync(customerId.Value, deliveryProvince, deliveryAddress);
+
+                // 2. Lưu chi tiết đơn hàng thông qua BusinessLayer
+                foreach (var item in checkoutItems)
                 {
-                    await connection.OpenAsync();
-                    using (var transaction = connection.BeginTransaction())
+                    var detail = new OrderDetail
                     {
-                        try
-                        {
-                            // 1. Lưu đơn hàng
-                            string sqlOrder = @"INSERT INTO Orders(OrderTime, CustomerID, DeliveryProvince, DeliveryAddress, Status) 
-                                               OUTPUT INSERTED.OrderID
-                                               VALUES(GETDATE(), @CustomerID, @Province, @Address, 1)";
-
-                            int orderId = await connection.QuerySingleAsync<int>(sqlOrder, new
-                            {
-                                CustomerID = customerId,
-                                Province = deliveryProvince,
-                                Address = deliveryAddress
-                            }, transaction);
-
-                            // 2. Lưu chi tiết đơn hàng
-                            string sqlDetail = @"INSERT INTO OrderDetails(OrderID, ProductID, Quantity, SalePrice) VALUES(@OrderID, @ProductID, @Quantity, @SalePrice)";
-                            foreach (var item in checkoutItems)
-                            {
-                                await connection.ExecuteAsync(sqlDetail, new
-                                {
-                                    OrderID = orderId,
-                                    ProductID = item.ProductID,
-                                    Quantity = item.Quantity,
-                                    SalePrice = item.SalePrice
-                                }, transaction);
-                            }
-
-                            // 3. XÓA TRONG DATABASE (Bảng Cart tạm lưu trữ)
-                            await connection.ExecuteAsync("DELETE FROM Cart WHERE CustomerID = @cid AND ProductID IN @pids",
-                                                          new { cid = customerId, pids = ids }, transaction);
-
-                            transaction.Commit();
-                        }
-                        catch
-                        {
-                            transaction.Rollback();
-                            throw;
-                        }
-                    }
+                        OrderID = orderId,
+                        ProductID = item.ProductID,
+                        Quantity = item.Quantity,
+                        SalePrice = item.SalePrice
+                    };
+                    await SalesDataService.AddDetailAsync(detail);
                 }
 
-                // 4. CẬP NHẬT LẠI SESSION GIỎ HÀNG (Dọn dẹp bộ nhớ tạm)
+                // 3. Xóa các mặt hàng đã thanh toán khỏi Database Cart
+                // Bằng cách lấy giỏ hàng DB hiện tại, loại bỏ các item vừa mua và Sync lại.
+                var dbCartItems = SalesDataService.ListCartItems(customerId.Value);
+                var remainingDbCart = dbCartItems.Where(c => !ids.Contains(c.ProductID)).ToList();
+                SalesDataService.SyncCart(customerId.Value, remainingDbCart);
+
+                // 4. Dọn dẹp session giỏ hàng cục bộ
                 foreach (var id in ids)
                 {
                     ShoppingCartHelper.RemoveItemFromCart(id);
@@ -185,54 +150,89 @@ namespace SV22T1020697.Shop.Controllers
             int? customerId = HttpContext.Session.GetInt32("CustomerID");
             if (!customerId.HasValue) return RedirectToAction("Login", "Customer");
 
-            using (var connection = new SqlConnection(_connectionString))
+            // Khởi tạo đầu vào tìm kiếm (lấy hết đơn hàng của khách hàng)
+            var searchInput = new OrderSearchInput
             {
-                string sql = @"SELECT OrderID, OrderTime, Status, DeliveryAddress, DeliveryProvince,
-                            (SELECT SUM(Quantity * SalePrice) FROM OrderDetails WHERE OrderID = Orders.OrderID) as TotalAmount
-                             FROM Orders WHERE CustomerID = @customerId ORDER BY OrderTime DESC";
-                var orders = await connection.QueryAsync<OrderItemModel>(sql, new { customerId });
-                return View(orders);
-            }
+                Page = 1,
+                PageSize = 9999, // Lấy số lượng lớn để hiển thị đủ lịch sử
+                SearchValue = ""
+            };
+
+            var pagedResult = await SalesDataService.ListOrdersAsync(searchInput);
+
+                    var orders = pagedResult.DataItems
+                .Where(o => o.CustomerID == customerId.Value)
+                .Select(o => new OrderItemModel
+                {
+                OrderID = o.OrderID,
+                CustomerName = o.CustomerName ?? "",
+                OrderTime = o.OrderTime,
+                Status = (int)o.Status, 
+                TotalAmount = o.TotalAmount,
+                DeliveryAddress = o.DeliveryAddress ?? "",
+                DeliveryProvince = o.DeliveryProvince ?? ""
+            })
+            .ToList();
+
+            return View(orders);
         }
 
         public async Task<IActionResult> Detail(int id)
         {
-            using (var connection = new SqlConnection(_connectionString))
+           
+            var orderData = await SalesDataService.GetOrderAsync(id);
+            if (orderData == null) return RedirectToAction("History");
+
+               var orderModel = new OrderItemModel
             {
-                var order = await connection.QueryFirstOrDefaultAsync<OrderItemModel>(
-                    @"SELECT o.*, c.CustomerName,
-                             (SELECT SUM(Quantity * SalePrice) FROM OrderDetails WHERE OrderID = o.OrderID) as TotalAmount 
-                      FROM Orders o
-                      LEFT JOIN Customers c ON o.CustomerID = c.CustomerID
-                      WHERE o.OrderID = @id", new { id });
+                OrderID = orderData.OrderID,
+                OrderTime = orderData.OrderTime,
+                CustomerName = orderData.CustomerName ?? "",
+                DeliveryAddress = orderData.DeliveryAddress ?? "",
+                DeliveryProvince = orderData.DeliveryProvince ?? "",
+                Status = (int)orderData.Status,
+                 
+                TotalAmount = orderData.TotalAmount
+            };
 
-                if (order is null) return RedirectToAction("History");
+            // 3. Lấy chi tiết sản phẩm
+            var detail = await SalesDataService.ListDetailsAsync(id);
 
-                var detail = await connection.QueryAsync<CartItem>(
-                    @"SELECT d.*, p.ProductName, p.Photo, p.Unit 
-                      FROM OrderDetails d JOIN Products p ON d.ProductID = p.ProductID 
-                      WHERE d.OrderID = @id", new { id });
+            // 4. Truyền dữ liệu
+            ViewBag.Order = orderModel;
 
-                ViewBag.Order = order;
-                return View(detail);
-            }
+            var cartModel = detail.Select(d => new CartItem
+            {
+                ProductID = d.ProductID,
+                ProductName = d.ProductName,
+                Photo = d.Photo,
+                Unit = d.Unit,
+                Quantity = d.Quantity,
+                SalePrice = d.SalePrice
+            }).ToList();
+
+            return View(cartModel);
         }
-
         public async Task<IActionResult> Edit(int id)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            var orderData = await SalesDataService.GetOrderAsync(id);
+
+            // Kiểm tra tồn tại và trạng thái (Chỉ cho phép sửa khi Status là New)
+            if (orderData == null || orderData.Status != OrderStatusEnum.New)
+                return RedirectToAction("Detail", new { id = id });
+  var model = new OrderItemModel
             {
-                var order = await connection.QueryFirstOrDefaultAsync<OrderItemModel>(
-                    @"SELECT o.*, c.CustomerName FROM Orders o 
-                      LEFT JOIN Customers c ON o.CustomerID = c.CustomerID 
-                      WHERE o.OrderID = @id", new { id });
+                OrderID = orderData.OrderID,
+                OrderTime = orderData.OrderTime,
+                CustomerName = orderData.CustomerName ?? "",
+                DeliveryAddress = orderData.DeliveryAddress ?? "",
+                DeliveryProvince = orderData.DeliveryProvince ?? "",
+                Status = (int)orderData.Status,
+                TotalAmount = orderData.TotalAmount
+            };
 
-                if (order == null || order.Status != 1)
-                    return RedirectToAction("Detail", new { id = id });
-
-                ViewBag.ProvinceList = await SelectListHelper.Provinces();
-                return View(order);
-            }
+            ViewBag.ProvinceList = await SelectListHelper.Provinces();
+            return View(model); // Trả về model đã được ép kiểu đúng
         }
 
         [HttpPost]
@@ -241,13 +241,22 @@ namespace SV22T1020697.Shop.Controllers
         {
             try
             {
-                using (var connection = new SqlConnection(_connectionString))
+                var orderInfo = await SalesDataService.GetOrderAsync(orderId);
+                if (orderInfo != null && orderInfo.Status == OrderStatusEnum.New)
                 {
-                    string sql = @"UPDATE Orders SET DeliveryProvince = @province, DeliveryAddress = @address 
-                                   WHERE OrderID = @id AND Status = 1";
-                    await connection.ExecuteAsync(sql, new { province = deliveryProvince, address = deliveryAddress, id = orderId });
+                    
+                    var orderToUpdate = new Order
+                    {
+                        OrderID = orderInfo.OrderID,
+                        CustomerID = orderInfo.CustomerID,
+                        DeliveryProvince = deliveryProvince,
+                        DeliveryAddress = deliveryAddress,
+                        Status = orderInfo.Status
+                    };
+
+                    await SalesDataService.UpdateOrderAsync(orderToUpdate);
+                    TempData["Success"] = "Cập nhật thành công";
                 }
-                TempData["Success"] = "Cập nhật thành công";
                 return RedirectToAction("Detail", new { id = orderId });
             }
             catch
@@ -257,25 +266,29 @@ namespace SV22T1020697.Shop.Controllers
             }
         }
 
+
+       
         [HttpPost]
+        [Route("Order/Cancel/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Cancel(int id)
         {
-            int? customerId = HttpContext.Session.GetInt32("CustomerID");
-            if (!customerId.HasValue) return Json(new { success = false, message = "Chưa đăng nhập!" });
+            // 1. Kiểm tra đơn hàng có tồn tại không
+            var order = await SalesDataService.GetOrderAsync(id);
+            if (order == null)
+                return Json(new { success = false, message = "Đơn hàng không tồn tại." });
 
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                var order = await connection.QueryFirstOrDefaultAsync<dynamic>(
-                    "SELECT Status FROM Orders WHERE OrderID = @id AND CustomerID = @customerId",
-                    new { id, customerId });
+            // 2. Rào lại lần nữa: Chỉ cho hủy nếu trạng thái là "Vừa tạo" (Status = 1)
+            if (order.Status != OrderStatusEnum.New)
+                return Json(new { success = false, message = "Đơn hàng này đã được duyệt, không thể hủy." });
 
-                if (order is null) return Json(new { success = false, message = "Đơn không tồn tại!" });
-                if ((int)order.Status != 1) return Json(new { success = false, message = "Chỉ huỷ được đơn mới tạo!" });
+            // 3. Thực hiện cập nhật trạng thái trong DB thành "Đã hủy"
+            bool result = await SalesDataService.CancelOrderAsync(id);
 
-                await connection.ExecuteAsync("UPDATE Orders SET Status = -1 WHERE OrderID = @id", new { id });
-                return Json(new { success = true, message = "Huỷ đơn thành công!" });
-            }
+            if (result)
+                return Json(new { success = true, message = "Đã hủy đơn hàng thành công!" });
+
+            return Json(new { success = false, message = "Lỗi hệ thống khi hủy đơn hàng." });
         }
     }
 }

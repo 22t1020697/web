@@ -1,5 +1,8 @@
-﻿@{
+﻿@model SV22T1020697.Models.Catalog.Product
+@{
     Layout = null;
+    // Lấy danh sách ảnh từ ViewBag đã được truyền từ Controller
+    var photos = ViewBag.Photos as IEnumerable<SV22T1020697.Models.Catalog.ProductPhoto>;
 }
 <div class="row justify-content-center">
     <div class="col-12">
@@ -13,7 +16,7 @@
                         </h6>
                     </div>
                     <div class="col text-end">
-                        <a class="btn btn-sm btn-primary" href="~/Product/CreatePhoto/123">
+                        <a class="btn btn-sm btn-primary" href="~/Product/CreatePhoto/@Model.ProductID">
                             <i class="bi bi-plus-circle me-1"></i>
                             Thêm ảnh
                         </a>
@@ -21,38 +24,63 @@
                 </div>
             </div>
 
-            <div class="card-body p-1">
+            <div class="card-body p-0">
+                @* Đổi p-1 thành p-0 để bảng sát lề card cho đẹp *@
                 <table class="table table-bordered table-hover mb-0">
                     <thead class="table-secondary">
                         <tr>
-                            <th style="width:120px">Ảnh</th>
+                            <th style="width:120px" class="text-center">Ảnh</th>
                             <th>Mô tả</th>
-                            <th style="width:120px" class="text-center">Thứ tự</th>
-                            <th style="width:120px">Hiển thị</th>
-                            <th style="width:100px"></th>
+                            <th style="width:100px" class="text-center">Thứ tự</th>
+                            <th style="width:100px" class="text-center">Hiển thị</th>
+                            <th style="width:100px" class="text-center">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @for (int i = 1; i <= 5; i++)
+                        @if (photos != null && photos.Any())
+                        {
+                            foreach (var item in photos)
+                            {
+                                <tr>
+                                    <td class="text-center align-middle">
+                                        @* Xử lý đường dẫn ảnh thông minh để tránh lỗi vỡ ảnh *@
+                                        <img src="@((string.IsNullOrEmpty(item.Photo))
+                                                                                                                                                  ? "/images/products/nophoto.png"
+                                                                                                                                                  : (item.Photo.StartsWith("products/", StringComparison.OrdinalIgnoreCase)
+                                                                                                                                                      ? $"/images/{item.Photo}"
+                                                                                                                                                      : $"/images/products/{item.Photo}"))"
+                                     onerror="this.src='/images/products/nophoto.png'"
+                                     class="img-thumbnail"
+                                     style="height:60px; width:60px; object-fit:cover;" />
+                            </td>
+                            <td class="align-middle">@item.Description</td>
+                            <td class="text-center align-middle">@item.DisplayOrder</td>
+                            <td class="text-center align-middle">
+                                @if (!item.IsHidden)
+                                        {
+                                            <span class="badge bg-success">Hiện</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Ẩn</span>
+                                        }
+                                    </td>
+                                    <td class="text-center text-nowrap align-middle">
+                                        <a class="btn btn-sm btn-outline-primary" href="~/Product/EditPhoto/@item.ProductID?photoId=@item.PhotoID">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a class="btn btn-sm btn-outline-danger" href="~/Product/DeletePhoto/@item.ProductID?photoId=@item.PhotoID">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td class="text-center">
-                                    <img src="~/images/products/demo.png"
-                                    class="img-thumbnail"
-                                    style="max-height:80px;" />
-                                </td>
-                                <td>Ảnh mặt trước sản phẩm</td>
-                                <td class="text-center">@i</td>
-                                <td class="text-center">
-                                    <span class="badge bg-success">Hiện</span>
-                                </td>
-                                <td class="text-center text-nowrap">
-                                    <a class="btn btn-sm btn-primary" href="~/Product/EditPhoto/123?photoId=456">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <a class="btn btn-sm btn-danger" href="~/Product/DeletePhoto/123?photoId=456">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
+                                <td colspan="5" class="text-center text-muted py-3">
+                                    Sản phẩm này chưa có ảnh nào.
                                 </td>
                             </tr>
                         }

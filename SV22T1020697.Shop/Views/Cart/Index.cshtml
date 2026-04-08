@@ -213,15 +213,20 @@
     }
 
     .btn-shop-now {
-        background-color: var(--qn-danger);
-        color: white;
+        display: inline-block;
+        background-color: #c92127; /* Màu đỏ chủ đạo */
+        color: white !important;
         text-transform: uppercase;
-        font-weight: bold;
-        padding: 12px 60px;
-        border-radius: 5px;
-        text-decoration: none;
-        transition: 0.3s;
+        font-weight: 800;
+        padding: 14px 50px;
+        border-radius: 10px;
+        text-decoration: none !important;
         border: none;
+        position: relative;
+        top: 0;
+        transition: all 0.2s ease; /* Chuyển động nhanh tạo cảm giác cơ học */
+        /* Tạo "đế" nút 3D và bóng đổ dưới sàn */
+        box-shadow: 0 5px 0 #8a161a, 0 10px 20px rgba(0, 0, 0, 0.2);
     }
 
         .btn-shop-now:hover {
@@ -356,7 +361,7 @@
     }
     else
     {
-        <div class="card shadow-sm border-0">
+        <div class="card shadow-lg border">
             <div class="empty-cart-header">
                 GIỎ HÀNG (0 sản phẩm)
             </div>

@@ -1,63 +1,72 @@
-﻿@{
+﻿@model SV22T1020697.Models.Catalog.ProductAttribute
+@{
     ViewBag.Title = "Xóa thuộc tính sản phẩm";
 }
 
-<div class="container-fluid mt-4">
+@section PageToolBar {
+    <button type="submit" form="formDelete" class="btn btn-danger">
+        <i class="bi bi-trash me-1"></i> Xác nhận xóa
+    </button>
+    <a href="~/Product/Edit/@Model.ProductID#attributes" class="btn btn-secondary ms-1">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+}
 
+<div class="container-fluid mt-4">
     <div class="row justify-content-center">
         <div class="col-md-6">
 
-            <!-- Card -->
             <div class="card border-danger shadow-sm">
-
-                <!-- Header -->
                 <div class="card-header bg-danger text-white">
                     <h5 class="mb-0">
-                        <i class="bi bi-exclamation-triangle"></i>
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
                         Xác nhận xóa thuộc tính
                     </h5>
                 </div>
 
-                <!-- Body -->
                 <div class="card-body">
 
-                    <div class="alert alert-warning">
-                        <i class="bi bi-info-circle"></i>
-                        Bạn có chắc chắn muốn <strong>xóa thuộc tính</strong> sau không?
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show mb-3">
+                            <i class="bi bi-exclamation-triangle me-1"></i> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="alert alert-warning d-flex align-items-center">
+                        <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                        <div>
+                            Bạn có chắc chắn muốn <strong>xóa thuộc tính</strong> này khỏi sản phẩm không?
+                        </div>
                     </div>
 
-                    <!-- Thông tin thuộc tính -->
-                    <table class="table table-bordered">
+                    <table class="table table-bordered mb-0">
                         <tr>
-                            <th width="35%">Tên thuộc tính</th>
-                            <td>Hạn sử dụng</td>
+                            <th class="bg-light" width="35%">Tên thuộc tính</th>
+                            <td class="fw-bold text-primary">@Model.AttributeName</td>
                         </tr>
                         <tr>
-                            <th>Giá trị</th>
-                            <td>6 tháng</td>
+                            <th class="bg-light">Giá trị</th>
+                            <td>@Model.AttributeValue</td>
                         </tr>
                         <tr>
-                            <th>Thứ tự</th>
-                            <td>1</td>
+                            <th class="bg-light">Thứ tự hiển thị</th>
+                            <td>@Model.DisplayOrder</td>
                         </tr>
                     </table>
 
-                    <!-- Form -->
-                    <form method="post" action="/Product/DeleteAttribute/1?attributeId=1">
-                        <div class="d-flex justify-content-between mt-4">
-                            <a href="/Product/ListAttributes/1"
-                               class="btn btn-secondary">
-                                <i class="bi bi-arrow-left"></i> Hủy
-                            </a>
-
-                            <button type="submit" class="btn btn-danger">
-                                <i class="bi bi-trash"></i> Xác nhận xóa
-                            </button>
-                        </div>
+                    @* Form chuẩn sử dụng hidden input để gửi POST tới Controller *@
+                    <form id="formDelete" method="post" action="~/Product/DeleteAttribute">
+                        <input type="hidden" name="attributeId" value="@Model.AttributeID" />
+                        <input type="hidden" name="productId" value="@Model.ProductID" />
                     </form>
 
                 </div>
+            </div>
 
+            <div class="text-center mt-3 text-muted">
+                <small><i class="bi bi-lock"></i> Hành động này không thể hoàn tác sau khi xác nhận.</small>
             </div>
 
         </div>

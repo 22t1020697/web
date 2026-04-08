@@ -1,6 +1,5 @@
-﻿using SV22T1020697.Datalayers.SqlServer;
+﻿using SV22T1020697.DataLayers.SqlServer;
 using SV22T1020697.BusinessLayers;
-using SV22T1020697.Datalayers.SqlServer;
 using SV22T1020697.DataLayers.Interfaces;
 using SV22T1020697.DataLayers.SQLServer;
 using SV22T1020697.Models.Catalog;
